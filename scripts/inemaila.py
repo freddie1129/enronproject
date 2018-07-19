@@ -18,7 +18,7 @@ def run():
     pool = ThreadPool(10)
 
     #abpath = "/home/freddie/PycharmProjects/testdata/"
-    mailpath = "/home/freddie/PycharmProjects/maildir/"
+    mailpath = "~/maildir/"
     subdir = glob(mailpath + '*/')
     result = pool.map(importData, subdir)
     for e in result:
