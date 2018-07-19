@@ -86,13 +86,25 @@ WSGI_APPLICATION = 'dayandnight.wsgi.application'
 #}
 
 
+#DATABASES = {
+#    'default': {
+#	'ENGINE': 'django.db.backends.mysql',
+#	'NAME': 'enron',
+#        'USER': 'root',
+#        'PASSWORD': '',
+#        'HOST': '127.0.0.1',   # Or an IP Address that your DB is hosted on
+#        'PORT': '3306',
+#        #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#    }
+#}
+
 DATABASES = {
     'default': {
 	'ENGINE': 'django.db.backends.mysql',
-	'NAME': 'enron',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',   # Or an IP Address that your DB is hosted on
+	'NAME': 'testdb',
+        'USER': 'freddie',
+        'PASSWORD': 'z3w8FXfWxTFTVwM3',
+        'HOST': '138.68.247.251',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
         #'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
