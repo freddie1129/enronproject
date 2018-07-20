@@ -4,8 +4,7 @@ from multiprocessing import Process
 from django.db import connection
 import os
 from .Enronlib import EnronEmail
-mailpath = "/home/freddie/NLPProject/RawData/maildir/"
-mailpath = "/home/freddie/NLPProject/maildir/"
+mailpath = "/root/project/maildir/"
 
 def run():
     #getFileNumber()

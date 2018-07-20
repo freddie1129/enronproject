@@ -5,7 +5,7 @@ from .Enronlib import EnronEmail
 from django.core.exceptions import ObjectDoesNotExist
 
 #mailpath = "/home/freddie/NLPProject/RawData"
-mailpath = "/home/freddie/PycharmProjects/maildir/"
+mailpath = "/root/project/maildir/"
 
 
 

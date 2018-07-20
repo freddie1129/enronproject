@@ -14,10 +14,10 @@ mailpath = "/home/freddie/PycharmProjects/maildir/"
 num = 0;
 
 def run():
-    pool = ThreadPool(50)
+    pool = ThreadPool(5)
 
     # abpath = "/home/freddie/PycharmProjects/testdata/"
-    mailpath = "/home/freddie/PycharmProjects/maildir/"
+    mailpath = "/root/maildir/"
 
     dirs = os.listdir(mailpath)
 
