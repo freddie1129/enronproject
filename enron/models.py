@@ -59,7 +59,7 @@ class Email(models.Model):
 class ToEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
     receiverAddress = models.CharField(max_length=200)
-    staffName = models.ForeignKey(StaffName, verbose_name='staffName', on_delete=models.CASCADE)
+    staffName = models.ForeignKey(StaffName, verbose_name='staffName', related_name='ToEmail', on_delete=models.CASCADE)
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -73,7 +73,7 @@ class ToEmail(models.Model):
 class CcEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
     receiverAddress = models.CharField(max_length=200)
-    staffName = models.ForeignKey(StaffName, verbose_name='staffName', on_delete=models.CASCADE)
+    staffName = models.ForeignKey(StaffName, verbose_name='staffName', related_name='CcEmail', on_delete=models.CASCADE)
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -87,7 +87,7 @@ class CcEmail(models.Model):
 class BccEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
     receiverAddress = models.CharField(max_length=200)
-    staffName = models.ForeignKey(StaffName, verbose_name='staffName', on_delete=models.CASCADE)
+    staffName = models.ForeignKey(StaffName, verbose_name='staffName', related_name='BccEmail', on_delete=models.CASCADE)
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -160,7 +160,7 @@ class EmailWithAlias(models.Model):
 
 
 class EmailWithStaff(models.Model):
-    emailId = models.OneToOneField(Email, verbose_name='emailId', primary_key=True)
+    emailId = models.OneToOneField(Email, verbose_name='emailId', on_delete=models.CASCADE, primary_key=True)
     staffName = models.ForeignKey(StaffName, verbose_name='staffName', on_delete=models.CASCADE)
 
     def __str__(self):

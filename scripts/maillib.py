@@ -88,6 +88,7 @@ def initAliasTable():
             emailwithstaff.save()
         except:
             pass
+    
 
 def checkoutName(mailpath):
     dirs = os.listdir(mailpath)
