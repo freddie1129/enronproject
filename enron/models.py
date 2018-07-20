@@ -16,10 +16,30 @@ class Choice(models.Model):
     votes = models.IntegerField(default=0)
 
 
+class StaffName(models.Model):
+    name = models.CharField(max_length=64,primary_key=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Enron Staff"
+        verbose_name_plural = "Enron Staffs"
+
+
+class StaffEmail(models.Model):
+    emailAddress = models.CharField(max_length=64)
+    staffName = models.ForeignKey(StaffName, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.staffName + ":" + self.emailAddress
+
+    class Meta:
+        verbose_name = "Enron Staff Email Address"
+        verbose_name_plural = "Enron Staff Email Addresses"
 
 
 class Email(models.Model):
-
     emailId = models.CharField(max_length=100,primary_key=True)
     time = models.DateTimeField()
     fromAddress = models.CharField(max_length=200)
@@ -35,20 +55,11 @@ class Email(models.Model):
         verbose_name = "Sended Email"
         verbose_name_plural = "Sended Emails"
 
-class EmailWithAlias(models.Model):
-    emailId = models.ForeignKey(Email, on_delete=models.CASCADE, primary_key=True)
-    staff = models.ForeignKey(StaffName, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return '{0} ({1})'.format(self.emailId, self.staffName)
-
-    class Meta:
-        verbose_name = "Email With Alias"
-        verbose_name_plural = "Email With Alias"
 
 class ToEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
     receiverAddress = models.CharField(max_length=200)
+    staffName = models.ForeignKey(StaffName, verbose_name='staffName', on_delete=models.CASCADE)
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -58,9 +69,11 @@ class ToEmail(models.Model):
         verbose_name = "Received Email"
         verbose_name_plural = "Received Emails"
 
+
 class CcEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
     receiverAddress = models.CharField(max_length=200)
+    staffName = models.ForeignKey(StaffName, verbose_name='staffName', on_delete=models.CASCADE)
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -70,9 +83,11 @@ class CcEmail(models.Model):
         verbose_name = "CC Received Email"
         verbose_name_plural = "CC Received Emails"
 
+
 class BccEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
     receiverAddress = models.CharField(max_length=200)
+    staffName = models.ForeignKey(StaffName, verbose_name='staffName', on_delete=models.CASCADE)
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -115,7 +130,6 @@ class ReceiverCC(models.Model):
     def __str__(self):
         return '{0} ({1})'.format(self.name, self.number)
 
-
     class Meta:
         verbose_name = "CC Receiver Email Address"
         verbose_name_plural = "CC Receiver Email Addresses"
@@ -128,31 +142,30 @@ class ReceiverBCC(models.Model):
     def __str__(self):
         return '{0} ({1})'.format(self.name, self.number)
 
-
     class Meta:
         verbose_name = "BCC Receiver Email Address"
         verbose_name_plural = "BCC Receiver Email Addresses"
 
 
-
-class StaffName(models.Model):
-    name = models.CharField(max_length=64,primary_key=True)
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = "Enron Staff"
-        verbose_name_plural = "Enron Staffs"
-
-
-
-class StaffEmail(models.Model):
-    emailAddress = models.CharField(max_length=64)
-    staffName = models.ForeignKey(StaffName, on_delete=models.CASCADE)
+class EmailWithAlias(models.Model):
+    emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
+    staffName = models.CharField(max_length=64)
 
     def __str__(self):
-        return self.staffName + ":" + self.emailAddress
+        return '{0} ({1})'.format(self.emailId, self.staffName)
 
     class Meta:
-        verbose_name = "Enron Staff Email Address"
-        verbose_name_plural = "Enron Staff Email Addresses"
+        verbose_name = "Email With Alias"
+        verbose_name_plural = "Email With Alias"
+
+
+class EmailWithStaff(models.Model):
+    emailId = models.OneToOneField(Email, verbose_name='emailId', primary_key=True)
+    staffName = models.ForeignKey(StaffName, verbose_name='staffName', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return '{0} ({1})'.format(self.emailId, self.staffName)
+
+    class Meta:
+        verbose_name = "Email With Staff Name"
+        verbose_name_plural = "Email With Staff Name"

@@ -1,6 +1,7 @@
 from enron.models import  Choice, Question, Email, Sender, ToEmail,CcEmail,BccEmail, ReceiverTo, ReceiverBCC,ReceiverCC
 from enron.models import StaffName, StaffEmail
 from enron.models import EmailWithAlias
+from enron.models import EmailWithStaff
 from multiprocessing import Process
 from django.db import connection
 import os
@@ -78,6 +79,15 @@ def initAliasTable():
     print('Email Number: {0}'.format(size))
     while i < size:
         email = emails[i]
+        i += 1
+        s = StaffEmail.objects.filter(emailAddredd=email.fromAddress)
+        try:
+            name = str(s[0].staffName)
+            staff = StaffName.objects.get(pk=name)
+            emailwithstaff = EmailWithStaff(emailId = email,staffName = staff)
+            emailwithstaff.save()
+        except:
+            pass
 
 def checkoutName(mailpath):
     dirs = os.listdir(mailpath)
