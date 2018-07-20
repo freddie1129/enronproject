@@ -2,6 +2,8 @@ from enron.models import  Choice, Question, Email, Sender, ToEmail,CcEmail,BccEm
 from enron.models import StaffName, StaffEmail
 from enron.models import EmailWithAlias
 from enron.models import EmailWithStaff
+from enron.models import AnalysisResult
+from .emailconst import mailConstant
 from multiprocessing import Process
 from django.db import connection
 import os
@@ -88,7 +90,67 @@ def initAliasTable():
             emailwithstaff.save()
         except:
             pass
-    
+
+def addStaffNameToEmail(emailTypeClass):
+    size = emailTypeClass.objects.count()
+    emails = emailTypeClass.objects.all()
+    number_from = 0
+    number_to = 0
+    number_between = 0
+    i = 0
+    class_name = emailTypeClass.__name__
+    print('Add Staff Name To {0}'.format(class_name))
+    print('Email Number: {0}'.format(size))
+    while i < size:
+        email = emails[i]
+        i += 1
+        s_from = StaffEmail.objects.filter(emailAddredd=email.fromAddress)
+        is_from = False
+        is_to = False
+        try:
+            nameFrom = str(s_from[0].staffName)
+            staff = StaffName.objects.get(pk=nameFrom)
+            email.staffNameFrom = staff
+            email.save()
+            number_from += 1
+            is_from = True
+        except:
+            is_from = False
+            pass
+        s_to = StaffEmail.objects.filter(emailAddredd=email.fromAddress)
+        try:
+            nameTo = str(s_to[0].staffName)
+            staff = StaffName.objects.get(pk=nameTo)
+            email.staffName = staff
+            email.save()
+            number_to += 1
+            is_to = True
+        except:
+            is_to = False
+            pass
+        if is_from and is_to:
+            number_between += 1
+        else:
+            is_from = False
+            is_to = False
+
+    if class_name == ToEmail.__name__:
+        res = AnalysisResult(mailConstant.result_received_email_number_from_enron_group,'',number_from)
+        res.save()
+        print(res)
+        res = AnalysisResult(mailConstant.result_received_email_number_from_external,'',size - number_from)
+        res.save()
+        print(res)
+        res = AnalysisResult(mailConstant.result_received_email_number_to_enron_group,'',number_to)
+        res.save()
+        print(res)
+        res = AnalysisResult(mailConstant.result_received_email_number_to_external,'', size - number_to)
+        res.save()
+        print(res)
+        res = AnalysisResult(mailConstant.result_received_email_number_between_enron_group,'', number_between)
+        res.save()
+        print(res)
+
 
 def checkoutName(mailpath):
     dirs = os.listdir(mailpath)

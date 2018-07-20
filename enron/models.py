@@ -58,6 +58,7 @@ class Email(models.Model):
 
 class ToEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
+    staffNameFrom = models.ForeignKey(StaffName, verbose_name='staffNameFrom', related_name='ToEmailFrom', on_delete=models.CASCADE)
     receiverAddress = models.CharField(max_length=200)
     staffName = models.ForeignKey(StaffName, verbose_name='staffName', related_name='ToEmail', on_delete=models.CASCADE)
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
@@ -72,6 +73,7 @@ class ToEmail(models.Model):
 
 class CcEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
+    staffNameFrom = models.ForeignKey(StaffName, verbose_name='staffNameFrom', related_name='CcEmailFrom', on_delete=models.CASCADE)
     receiverAddress = models.CharField(max_length=200)
     staffName = models.ForeignKey(StaffName, verbose_name='staffName', related_name='CcEmail', on_delete=models.CASCADE)
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
@@ -86,6 +88,7 @@ class CcEmail(models.Model):
 
 class BccEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
+    staffNameFrom = models.ForeignKey(StaffName, verbose_name='staffNameFrom', related_name='BccEmailFrom', on_delete=models.CASCADE)
     receiverAddress = models.CharField(max_length=200)
     staffName = models.ForeignKey(StaffName, verbose_name='staffName', related_name='BccEmail', on_delete=models.CASCADE)
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
@@ -169,3 +172,16 @@ class EmailWithStaff(models.Model):
     class Meta:
         verbose_name = "Email With Staff Name"
         verbose_name_plural = "Email With Staff Name"
+
+
+class AnalysisResult(models.Model):
+    item = models.CharField(max_length=64,primary_key=True)
+    itemDes = models.CharField(max_length=64)
+    itemNumber = models.BigIntegerField()()
+
+    def __str__(self):
+        return '{0}:{1}:{2}'.format(self.item, self.itemDes,self.itemNumber)
+
+    class Meta:
+        verbose_name = "Analysis Result"
+        verbose_name_plural = "Analysis Result"

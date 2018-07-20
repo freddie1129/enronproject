@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Question
 from enron.models import Email, ToEmail, CcEmail, BccEmail, Sender, ReceiverTo, ReceiverCC, ReceiverBCC, StaffName, StaffEmail
+from  enron.models import AnalysisResult
 # Register your models here.
 
 class EnronAdmin(admin.ModelAdmin):
@@ -18,3 +19,5 @@ admin.site.register(ReceiverCC,EnronAdmin)
 admin.site.register(ReceiverBCC,EnronAdmin)
 admin.site.register(StaffName,EnronAdmin)
 admin.site.register(StaffEmail,EnronAdmin)
+admin.site.register(AnalysisResult,EnronAdmin)
+

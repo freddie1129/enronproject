@@ -1,4 +1,7 @@
 from .maillib import initStaffNameTable
+from .maillib import addStaffNameToEmail
+
 
 def run():
-    initStaffNameTable()
+    addStaffNameToEmail()
+    #initStaffNameTable()
