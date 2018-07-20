@@ -4,7 +4,6 @@ from django.db import models
 
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
-    question_textadd = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date published')
 
     def __str__(self):
@@ -24,6 +23,7 @@ class Email(models.Model):
     emailId = models.CharField(max_length=100,primary_key=True)
     time = models.DateTimeField()
     fromAddress = models.CharField(max_length=200)
+    staffName = models.CharField(max_length=64)
     subject = models.CharField(max_length=512)
     content = models.TextField();
     path = models.CharField(max_length=128);
@@ -36,8 +36,8 @@ class Email(models.Model):
         verbose_name_plural = "Sended Emails"
 
 class EmailWithAlias(models.Model):
-    emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
-    staffName = models.CharField(max_length=64)
+    emailId = models.ForeignKey(Email, on_delete=models.CASCADE, primary_key=True)
+    staff = models.ForeignKey(StaffName, on_delete=models.CASCADE)
 
     def __str__(self):
         return '{0} ({1})'.format(self.emailId, self.staffName)

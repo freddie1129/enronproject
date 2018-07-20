@@ -48,14 +48,36 @@ def getFileNumber():
     return number
 
 def initStaffNameTable():
-    for email in Email.objects.all()[0:10000]:
+    size = Email.objects.count()  
+    emails = Email.objects.all()
+    number = 0
+    i = 0
+    print("Emails: " + str(size) + "\n")
+    while i < size:
+        email = emails[i]
+        i += 1
         s = StaffEmail.objects.filter(emailAddress=email.fromAddress)
         try:
-            staffName = s[0].staffName
-        except:
-            staffName = ''
-        emailAlias = EmailWithAlias(emailId=email,staffName=staffName)
-        emailAlias.save()
+            #print(email.staffName)
+            #print(len(s))
+            #print(s[0].staffName)
+            #print(email.emailId)
+            email.staffName = str(s[0].staffName)
+            #print('name:' + email.staffName)
+            email.save()
+            number += 1
+        except:  
+            pass
+    print("number:" + str(number))
+
+def initAliasTable():
+    size = Email.objects.count()
+    emails = Email.objects.all()
+    number = 0
+    i = 0
+    print('Email Number: {0}'.format(size))
+    while i < size:
+        email = emails[i]
 
 def checkoutName(mailpath):
     dirs = os.listdir(mailpath)
