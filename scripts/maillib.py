@@ -1,5 +1,6 @@
 from enron.models import  Choice, Question, Email, Sender, ToEmail,CcEmail,BccEmail, ReceiverTo, ReceiverBCC,ReceiverCC
 from enron.models import StaffName, StaffEmail
+from enron.models import EmailWithAlias
 from multiprocessing import Process
 from django.db import connection
 import os
@@ -45,6 +46,16 @@ def getFileNumber():
             print(filename)
     print("File Number: " + str(number))
     return number
+
+def initStaffNameTable():
+    for email in Email.objects.all()[0:10000]:
+        s = StaffEmail.objects.filter(emailAddress=email.fromAddress)
+        try:
+            staffName = s[0].staffName
+        except:
+            staffName = ''
+        emailAlias = EmailWithAlias(emailId=email,staffName=staffName)
+        emailAlias.save()
 
 def checkoutName(mailpath):
     dirs = os.listdir(mailpath)

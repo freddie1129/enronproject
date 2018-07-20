@@ -4,6 +4,7 @@ from django.db import models
 
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
+    question_textadd = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date published')
 
     def __str__(self):
@@ -14,6 +15,8 @@ class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     choice_text = models.CharField(max_length=200)
     votes = models.IntegerField(default=0)
+
+
 
 
 class Email(models.Model):
@@ -31,7 +34,17 @@ class Email(models.Model):
     class Meta:
         verbose_name = "Sended Email"
         verbose_name_plural = "Sended Emails"
-        default_permissions=('view')
+
+class EmailWithAlias(models.Model):
+    emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
+    staffName = models.CharField(max_length=64)
+
+    def __str__(self):
+        return '{0} ({1})'.format(self.emailId, self.staffName)
+
+    class Meta:
+        verbose_name = "Email With Alias"
+        verbose_name_plural = "Email With Alias"
 
 class ToEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
@@ -44,7 +57,6 @@ class ToEmail(models.Model):
     class Meta:
         verbose_name = "Received Email"
         verbose_name_plural = "Received Emails"
-        default_permissions = ('view')
 
 class CcEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
@@ -57,10 +69,6 @@ class CcEmail(models.Model):
     class Meta:
         verbose_name = "CC Received Email"
         verbose_name_plural = "CC Received Emails"
-        default_permissions = ('view')
-
-
-
 
 class BccEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
@@ -74,7 +82,6 @@ class BccEmail(models.Model):
     class Meta:
         verbose_name = "BCC Received Email"
         verbose_name_plural = "CC Received Emails"
-        default_permissions = ('view')
 
 class Sender(models.Model):
     sender = models.CharField(max_length=128)
@@ -87,7 +94,6 @@ class Sender(models.Model):
     class Meta:
         verbose_name = "Sender Email Address"
         verbose_name_plural = "Sender Email Addresses"
-        default_permissions = ('view')
 
 class ReceiverTo(models.Model):
     name = models.CharField(max_length=128)
@@ -100,7 +106,6 @@ class ReceiverTo(models.Model):
     class Meta:
         verbose_name = "Receiver Email Address"
         verbose_name_plural = "Receiver Email Addresses"
-        default_permissions = ('view')
 
 
 class ReceiverCC(models.Model):
@@ -114,7 +119,6 @@ class ReceiverCC(models.Model):
     class Meta:
         verbose_name = "CC Receiver Email Address"
         verbose_name_plural = "CC Receiver Email Addresses"
-        default_permissions = ('view')
 
 
 class ReceiverBCC(models.Model):
@@ -128,7 +132,6 @@ class ReceiverBCC(models.Model):
     class Meta:
         verbose_name = "BCC Receiver Email Address"
         verbose_name_plural = "BCC Receiver Email Addresses"
-        default_permissions = ('view')
 
 
 
@@ -140,7 +143,6 @@ class StaffName(models.Model):
     class Meta:
         verbose_name = "Enron Staff"
         verbose_name_plural = "Enron Staffs"
-        default_permissions = ('view')
 
 
 
@@ -154,4 +156,3 @@ class StaffEmail(models.Model):
     class Meta:
         verbose_name = "Enron Staff Email Address"
         verbose_name_plural = "Enron Staff Email Addresses"
-        default_permissions = ('view')

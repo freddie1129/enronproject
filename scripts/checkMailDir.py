@@ -1,14 +1,11 @@
 import os
 import re
 from enron.models import Email
-from .Enronlib import EnronEmail
 from django.core.exceptions import ObjectDoesNotExist
 
-#mailpath = "/home/freddie/NLPProject/RawData"
+#check whether there is any file failed to be imported into db
+#if there is, write the lost files' name into lostFile.log
 mailpath = "/root/project/maildir/"
-
-
-
 
 def run():
     logfile = "./lostFile.log"
