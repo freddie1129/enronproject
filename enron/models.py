@@ -58,8 +58,9 @@ class Email(models.Model):
 
 class ToEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
+    staffNameFrom = models.CharField(max_length=32)
     receiverAddress = models.CharField(max_length=200)
-    staffName = models.ForeignKey(StaffName, verbose_name='staffName', related_name='ToEmail', on_delete=models.CASCADE)
+    staffName = models.CharField(max_length=32)
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
 
     def __str__(self):

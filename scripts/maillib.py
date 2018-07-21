@@ -109,8 +109,7 @@ def addStaffNameToEmail(emailTypeClass):
         try:
             nameFrom = str(s_from[0].staffName)
             staff = StaffName.objects.get(pk=nameFrom)
-            email.staffNameFrom = staff
-            #email.save()
+            email.staffNameFrom = staff.name
             number_from += 1
             is_from = True
         except:
@@ -121,8 +120,7 @@ def addStaffNameToEmail(emailTypeClass):
         try:
             nameTo = str(s_to[0].staffName)
             staff = StaffName.objects.get(pk=nameTo)
-            email.staffName = staff
-            #email.save()
+            email.staffName = staff.name
             number_to += 1
             is_to = True
         except:
@@ -135,10 +133,6 @@ def addStaffNameToEmail(emailTypeClass):
         email.save()
         if is_from and is_to:
             number_between += 1
-        else:
-            is_from = False
-            is_to = False
-            email.sta
 
     if class_name == ToEmail.__name__:
         res = AnalysisResult(mailConstant.result_received_email_number_from_enron_group,'',number_from)
