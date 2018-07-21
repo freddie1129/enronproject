@@ -93,7 +93,8 @@ def initAliasTable():
 
 def addStaffNameToEmail(emailTypeClass):
     size = emailTypeClass.objects.count()
-    emails = emailTypeClass.objects.all()
+    emails = emailTypeClass.objects.all()[0:1000]
+    size = len(emails)
     number_from = 0
     number_to = 0
     number_between = 0
@@ -103,8 +104,7 @@ def addStaffNameToEmail(emailTypeClass):
     print('Email Number: {0}'.format(size))
     while i < size:
         email = emails[i]
-        i += 1
-        s_from = StaffEmail.objects.filter(emailAddredd=email.fromAddress)
+        s_from = StaffEmail.objects.filter(emailAddress=email.fromAddress)
         is_from = False
         is_to = False
         try:
@@ -117,7 +117,7 @@ def addStaffNameToEmail(emailTypeClass):
         except:
             is_from = False
             pass
-        s_to = StaffEmail.objects.filter(emailAddredd=email.fromAddress)
+        s_to = StaffEmail.objects.filter(emailAddress=email.receiverAddress)
         try:
             nameTo = str(s_to[0].staffName)
             staff = StaffName.objects.get(pk=nameTo)
@@ -128,6 +128,7 @@ def addStaffNameToEmail(emailTypeClass):
         except:
             is_to = False
             pass
+        i += 1
         if is_from and is_to:
             number_between += 1
         else:

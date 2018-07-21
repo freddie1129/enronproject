@@ -1,7 +1,8 @@
+from enron.models import ToEmail
 from .maillib import initStaffNameTable
 from .maillib import addStaffNameToEmail
 
-
 def run():
-    addStaffNameToEmail()
+    #addStaffNameToEmail()
     #initStaffNameTable()
+    addStaffNameToEmail(ToEmail)

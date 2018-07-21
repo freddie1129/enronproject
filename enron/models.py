@@ -177,7 +177,7 @@ class EmailWithStaff(models.Model):
 class AnalysisResult(models.Model):
     item = models.CharField(max_length=64,primary_key=True)
     itemDes = models.CharField(max_length=64)
-    itemNumber = models.BigIntegerField()()
+    itemNumber = models.IntegerField()
 
     def __str__(self):
         return '{0}:{1}:{2}'.format(self.item, self.itemDes,self.itemNumber)
