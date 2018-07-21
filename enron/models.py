@@ -62,6 +62,7 @@ class ToEmail(models.Model):
     receiverAddress = models.CharField(max_length=200)
     staffName = models.CharField(max_length=32)
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
+    emailType = models.IntegerField(default=0)
 
     def __str__(self):
         return self.emailId

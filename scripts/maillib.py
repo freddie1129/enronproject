@@ -104,8 +104,7 @@ def getEmailIndex(emaillist,address):
 
 def addStaffNameToEmail(emailTypeClass):
     size = emailTypeClass.objects.count()
-    emails = emailTypeClass.objects.all()[0:1000]
-    size = len(emails)
+    emails = emailTypeClass.objects.all()
     number_from = 0
     number_to = 0
     number_between = 0
