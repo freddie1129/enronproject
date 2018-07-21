@@ -93,11 +93,13 @@ def initAliasTable():
 
 
 
-def getStaffNameByAddress(stafflist,address):
-    for staff in stafflist:
-        if staff.emailAddress == address:
-            return staff.staffName
-    return mailConstant.string_unknown
+def getStaffNameByAddress(emaillist,address):
+    try:
+       return emaillist.index
+    except:
+       return -1
+
+
 
 
 def addStaffNameToEmail(emailTypeClass):
@@ -110,11 +112,19 @@ def addStaffNameToEmail(emailTypeClass):
     class_name = emailTypeClass.__name__
     print('Add Staff Name To {0}'.format(class_name))
     print('Email Number: {0}'.format(size))
-    staffList = StaffName.objects.all()
+    staffList = StaffEmail.objects.all()
+    emaillist = [staff.staffAddress for staff in staffList]
+    nameList = [staff.staffName.name for staff in staffList]
+
 
     while i < size:
         email = emails[i]
-        nameFrom = getStaffNameByAddress(staffList,email.fromAddress)
+
+        index = getStaffNameByAddress(staffList,email.fromAddress)
+        if index != -1:
+            nameFrom = nameList[index]
+        else:
+            nameFrom = 
         nameTo = getStaffNameByAddress(staffList,email.receiverAddress)
         email.staffNameFrom = nameFrom
         email.staffName = nameTo
