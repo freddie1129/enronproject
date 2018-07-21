@@ -101,6 +101,15 @@ def getEmailIndex(emaillist,address):
 
 
 
+def getEmailType(is_from, is_to):
+    if is_from and is_to:
+        return mailConstant.email_type_between
+    elif is_from and not is_to:
+        return mailConstant.email_type_from
+    elif not is_from and is_to:
+        return  mailConstant.email_type_to
+    else:
+        return mailConstant.email_type_unknow
 
 def addStaffNameToEmail(emailTypeClass):
     size = emailTypeClass.objects.count()
@@ -118,7 +127,6 @@ def addStaffNameToEmail(emailTypeClass):
 
     while i < size:
         email = emails[i]
-
         index = getEmailIndex(emaillist,email.fromAddress)
         if index != -1:
             nameFrom = nameList[index]
@@ -133,11 +141,14 @@ def addStaffNameToEmail(emailTypeClass):
         email.staffName = nameTo
         is_from = nameFrom != mailConstant.string_unknown
         is_to = nameTo != mailConstant.string_unknown
+        email.emailType = getEmailType(is_from,is_to)
         email.save()
         if is_from and is_to:
             number_between += 1
+            email.emailType = mailConstant.email_type_between
         if is_from:
             number_from += 1
+
         if is_to:
             number_to += 1
         if i % 1000 == 0:

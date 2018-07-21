@@ -7,4 +7,9 @@ class mailConstant:
     result_received_email_number_to_external = "received email number to person outside enron group"
     result_received_email_number_between_enron_group = "received email number between enron group"
 
+    email_type_from = 1
+    email_type_to = 2
+    email_type_between = 3
+    email_type_unknow = 0
+
     string_unknown = "unkonwn"
