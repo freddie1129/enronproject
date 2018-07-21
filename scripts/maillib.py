@@ -91,7 +91,66 @@ def initAliasTable():
         except:
             pass
 
+
+
+def getStaffNameByAddress(stafflist,address):
+    for staff in stafflist:
+        if staff.emailAddress == address:
+            return staff.staffName
+    return mailConstant.string_unknown
+
+
 def addStaffNameToEmail(emailTypeClass):
+    size = emailTypeClass.objects.count()
+    emails = emailTypeClass.objects.all()[0:5000]
+    number_from = 0
+    number_to = 0
+    number_between = 0
+    i = 0
+    class_name = emailTypeClass.__name__
+    print('Add Staff Name To {0}'.format(class_name))
+    print('Email Number: {0}'.format(size))
+    staffList = StaffName.objects.all()
+
+    while i < size:
+        email = emails[i]
+        nameFrom = getStaffNameByAddress(staffList,email.fromAddress)
+        nameTo = getStaffNameByAddress(staffList,email.receiverAddress)
+        email.staffNameFrom = nameFrom
+        email.staffName = nameTo
+        is_from = nameFrom != mailConstant.string_unknown
+        is_to = nameTo != mailConstant.string_unknown
+        email.save()
+        if is_from and is_to:
+            number_between += 1
+        if is_from:
+            number_from += 1
+        if is_to:
+            number_to += 1
+        if i % 1000 == 0:
+            print('processed {0}\n'.format(i))
+        email.save()
+        i += 1
+
+    if class_name == ToEmail.__name__:
+        res = AnalysisResult(mailConstant.result_received_email_number_from_enron_group, '', number_from)
+        res.save()
+        print(res)
+        res = AnalysisResult(mailConstant.result_received_email_number_from_external, '', size - number_from)
+        res.save()
+        print(res)
+        res = AnalysisResult(mailConstant.result_received_email_number_to_enron_group, '', number_to)
+        res.save()
+        print(res)
+        res = AnalysisResult(mailConstant.result_received_email_number_to_external, '', size - number_to)
+        res.save()
+        print(res)
+        res = AnalysisResult(mailConstant.result_received_email_number_between_enron_group, '', number_between)
+        res.save()
+        print(res)
+
+
+def addStaffNameToEmailV1(emailTypeClass):
     size = emailTypeClass.objects.count()
     emails = emailTypeClass.objects.all()
     number_from = 0
@@ -101,6 +160,8 @@ def addStaffNameToEmail(emailTypeClass):
     class_name = emailTypeClass.__name__
     print('Add Staff Name To {0}'.format(class_name))
     print('Email Number: {0}'.format(size))
+    staffNameList = StaffName.objects.all()
+
     while i < size:
         email = emails[i]
         s_from = StaffEmail.objects.filter(emailAddress=email.fromAddress)
