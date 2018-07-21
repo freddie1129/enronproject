@@ -93,8 +93,7 @@ def initAliasTable():
 
 def addStaffNameToEmail(emailTypeClass):
     size = emailTypeClass.objects.count()
-    emails = emailTypeClass.objects.all()[0:1000]
-    size = len(emails)
+    emails = emailTypeClass.objects.all()
     number_from = 0
     number_to = 0
     number_between = 0
@@ -111,10 +110,11 @@ def addStaffNameToEmail(emailTypeClass):
             nameFrom = str(s_from[0].staffName)
             staff = StaffName.objects.get(pk=nameFrom)
             email.staffNameFrom = staff
-            email.save()
+            #email.save()
             number_from += 1
             is_from = True
         except:
+            email.staffNameFrom = ''
             is_from = False
             pass
         s_to = StaffEmail.objects.filter(emailAddress=email.receiverAddress)
@@ -122,18 +122,23 @@ def addStaffNameToEmail(emailTypeClass):
             nameTo = str(s_to[0].staffName)
             staff = StaffName.objects.get(pk=nameTo)
             email.staffName = staff
-            email.save()
+            #email.save()
             number_to += 1
             is_to = True
         except:
+            email.staffName = ''
             is_to = False
             pass
+        if i % 1000 == 0:
+            print('processed {0}\n'.format(i))
         i += 1
+        email.save()
         if is_from and is_to:
             number_between += 1
         else:
             is_from = False
             is_to = False
+            email.sta
 
     if class_name == ToEmail.__name__:
         res = AnalysisResult(mailConstant.result_received_email_number_from_enron_group,'',number_from)

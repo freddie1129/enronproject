@@ -58,7 +58,6 @@ class Email(models.Model):
 
 class ToEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
-    staffNameFrom = models.ForeignKey(StaffName, verbose_name='staffNameFrom', related_name='ToEmailFrom', on_delete=models.CASCADE)
     receiverAddress = models.CharField(max_length=200)
     staffName = models.ForeignKey(StaffName, verbose_name='staffName', related_name='ToEmail', on_delete=models.CASCADE)
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
@@ -185,3 +184,9 @@ class AnalysisResult(models.Model):
     class Meta:
         verbose_name = "Analysis Result"
         verbose_name_plural = "Analysis Result"
+
+class TestClassResult(models.Model):
+    item = models.CharField(max_length=64)
+
+    def __str__(self):
+        return item
