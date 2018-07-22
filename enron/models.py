@@ -1,4 +1,5 @@
 from django.db import models
+from scripts.emailconst import mailConstant
 
 # Create your models here.
 
@@ -62,7 +63,24 @@ class ToEmail(models.Model):
     receiverAddress = models.CharField(max_length=200)
     staffName = models.CharField(max_length=32)
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
-    emailType = models.IntegerField(default=0)
+    emailType = models.IntegerField(default=mailConstant.email_type_unset)
+
+    def __str__(self):
+        return self.emailId
+
+    class Meta:
+        verbose_name = "Received Email"
+        verbose_name_plural = "Received Emails"
+
+class ToEmailNew(models.Model):
+    emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
+    senderAddress = models.CharField(max_length=200)
+    receiverAddress = models.CharField(max_length=200)
+    senderName = models.ForeignKey(StaffName, blank=True, null=True,related_name ='sender', default=None, on_delete=models.CASCADE)
+    receiverName = models.ForeignKey(StaffName, blank = True, null=True, related_name ='receiver', default=None, on_delete=models.CASCADE)
+    emailType = models.IntegerField(default=mailConstant.email_type_unset)
+
+
 
     def __str__(self):
         return self.emailId
