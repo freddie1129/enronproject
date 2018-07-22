@@ -113,7 +113,9 @@ def getEmailType(is_from, is_to):
 
 def addStaffNameToEmail(emailTypeClass):
     size = emailTypeClass.objects.count()
-    emails = emailTypeClass.objects.all()
+    startpos = 260000
+    emails = emailTypeClass.objects.all()[260000:]
+    size = size - startpos
     number_from = 0
     number_to = 0
     number_between = 0
