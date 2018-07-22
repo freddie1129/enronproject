@@ -3,6 +3,7 @@ from enron.models import StaffName, StaffEmail
 from enron.models import EmailWithAlias
 from enron.models import EmailWithStaff
 from enron.models import AnalysisResult
+from enron.models import ToEmailNew,CcEmailNew,BccEmailNew
 from .emailconst import mailConstant
 from multiprocessing import Process
 from django.db import connection
@@ -363,5 +364,21 @@ def updateReceiverBcc():
                        )
             s.save()
         print("endbcc")
+
+def analysis_to_mail():
+    allStaff = StaffName.objects.all()
+    for staff in allStaff:
+        mails = ToEmailNew.objects.filter(senderName=staff)
+        mail_between = mails.filter(emailType=mailConstant.email_type_between)
+        mail_from = mails.filter(emailType=mailConstant.email_type_from)
+        mail_between = mails.filter(emailType=mailConstant.email_type_between)
+
+    pass
+
+def analysis_cc_mail():
+    pass
+
+def analysis_bcc_mail():
+    pass
 
 

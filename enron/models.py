@@ -80,8 +80,6 @@ class ToEmailNew(models.Model):
     receiverName = models.ForeignKey(StaffName, blank = True, null=True, related_name ='receiver', default=None, on_delete=models.CASCADE)
     emailType = models.IntegerField(default=mailConstant.email_type_unset)
 
-
-
     def __str__(self):
         return self.emailId
 
@@ -104,6 +102,21 @@ class CcEmail(models.Model):
         verbose_name = "CC Received Email"
         verbose_name_plural = "CC Received Emails"
 
+class CcEmailNew(models.Model):
+    emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
+    senderAddress = models.CharField(max_length=200)
+    receiverAddress = models.CharField(max_length=200)
+    senderName = models.ForeignKey(StaffName, blank=True, null=True,related_name ='sender', default=None, on_delete=models.CASCADE)
+    receiverName = models.ForeignKey(StaffName, blank = True, null=True, related_name ='receiver', default=None, on_delete=models.CASCADE)
+    emailType = models.IntegerField(default=mailConstant.email_type_unset)
+
+    def __str__(self):
+        return self.emailId
+
+    class Meta:
+        verbose_name = "CC Received Email"
+        verbose_name_plural = "CC Received Emails"
+
 
 class BccEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
@@ -115,10 +128,25 @@ class BccEmail(models.Model):
     def __str__(self):
         return self.emailId
 
+    class Meta:
+        verbose_name = "BCC Received Email"
+        verbose_name_plural = "CC Received Emails"
+
+class BccEmailNew(models.Model):
+    emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
+    senderAddress = models.CharField(max_length=200)
+    receiverAddress = models.CharField(max_length=200)
+    senderName = models.ForeignKey(StaffName, blank=True, null=True,related_name ='sender', default=None, on_delete=models.CASCADE)
+    receiverName = models.ForeignKey(StaffName, blank = True, null=True, related_name ='receiver', default=None, on_delete=models.CASCADE)
+    emailType = models.IntegerField(default=mailConstant.email_type_unset)
+
+    def __str__(self):
+        return self.emailId
 
     class Meta:
         verbose_name = "BCC Received Email"
         verbose_name_plural = "CC Received Emails"
+
 
 class Sender(models.Model):
     sender = models.CharField(max_length=128)
@@ -209,4 +237,13 @@ class TestClassResult(models.Model):
     item = models.CharField(max_length=64)
 
     def __str__(self):
-        return item
+        return self.item
+
+
+class StaCommunication(models.Model):
+    staffName1 = models.ForeignKey(StaffName, blank = True, null=True, related_name ='staff1', default=None, on_delete=models.CASCADE)
+    staffName2 = models.ForeignKey(StaffName, blank = True, null=True, related_name ='staff2', default=None, on_delete=models.CASCADE)
+    record = models.TextField()
+
+    def __str__(self):
+        return self.record

@@ -6,7 +6,7 @@ from enron.models import StaffName
 from enron.models import StaffEmail
 from pathlib import PurePath
 from .emailconst import mailConstant
-from enron.models import ToEmailNew
+from enron.models import ToEmailNew, CcEmailNew, BccEmailNew
 
 #mailpath = "/home/freddie/PycharmProjects/testdata/slinger-r"
 
@@ -114,20 +114,56 @@ def refreshToEmailTable(mailpath):
                              content=email.content,
                              path=path
                              )
-            mailToList = []
-            for index, receiver_to in enumerate(email.toAddress):
+            fileCount += 1
+
+            #mailTo
+            # mailToList = []
+            # for index, receiver_to in enumerate(email.toAddress):
+            #     senderName = getStaff(email.fromAddress)
+            #     receiverName = getStaff(receiver_to)
+            #     toemail = ToEmailNew(
+            #                       emailId=mail,
+            #                       senderAddress=email.fromAddress,
+            #                       receiverAddress=receiver_to,
+            #                       senderName=senderName,
+            #                       receiverName=receiverName,
+            #                       emailType=getEmailType(senderName=senderName, receiverName=receiverName)
+            #                       )
+            #     mailToList.append(toemail)
+            # ToEmailNew.objects.bulk_create(mailToList)
+
+            #mailCc
+            mailCcList = []
+            for index, receiver_cc in enumerate(email.ccAddress):
                 senderName = getStaff(email.fromAddress)
-                receiverName = getStaff(receiver_to)
-                toemail = ToEmailNew(
-                                  emailId=mail,
-                                  senderAddress=email.fromAddress,
-                                  receiverAddress=receiver_to,
-                                  senderName=senderName,
-                                  receiverName=receiverName,
-                                  emailType=getEmailType(senderName=senderName, receiverName=receiverName)
-                                  )
-                mailToList.append(toemail)
-            ToEmailNew.objects.bulk_create(mailToList)
+                receiverName = getStaff(receiver_cc)
+                ccemail = CcEmailNew(
+                    emailId=mail,
+                    senderAddress=email.fromAddress,
+                    receiverAddress=receiver_cc,
+                    senderName=senderName,
+                    receiverName=receiverName,
+                    emailType=getEmailType(senderName=senderName, receiverName=receiverName)
+                )
+                mailCcList.append(ccemail)
+            CcEmailNew.objects.bulk_create(mailCcList)
+
+            #mailBcc
+            mailBccList = []
+            for index, receiver_bcc in enumerate(email.bccAddress):
+                senderName = getStaff(email.fromAddress)
+                receiverName = getStaff(receiver_bcc)
+                bccemail = BccEmailNew(
+                    emailId=mail,
+                    senderAddress=email.fromAddress,
+                    receiverAddress=receiver_bcc,
+                    senderName=senderName,
+                    receiverName=receiverName,
+                    emailType=getEmailType(senderName=senderName, receiverName=receiverName)
+                )
+                mailBccList.append(bccemail)
+            BccEmailNew.objects.bulk_create(mailBccList)
+
             os.remove(filename)
     print("Totle: " + str(fileCount))
     print("END: " + str(datetime.datetime.now()) + " " + dirPath)
