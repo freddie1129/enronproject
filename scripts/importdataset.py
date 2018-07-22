@@ -22,7 +22,7 @@ def run():
     mailpath = "/root/maildir/"
 
     subdir = glob(mailpath + '*/')
-    result = pool.map(importData, subdir)
+    result = pool.map(refreshToEmailTable, subdir)
     for e in result:
         print(e)
     print("finished************************")
@@ -120,7 +120,7 @@ def refreshToEmailTable(mailpath):
                 receiverName = getStaff(receiver_to)
                 toemail = ToEmailNew(
                                   emailId=mail,
-                                  fromAddress=email.fromAddress,
+                                  senderAddress=email.fromAddress,
                                   receiverAddress=receiver_to,
                                   senderName=senderName,
                                   receiverName=receiverName,
