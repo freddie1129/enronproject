@@ -5,4 +5,5 @@ from .maillib import addStaffNameToEmail
 def run():
     #addStaffNameToEmail()
     #initStaffNameTable()
-    addStaffNameToEmail(ToEmail)
+    #addStaffNameToEmail(ToEmail)
+    pass

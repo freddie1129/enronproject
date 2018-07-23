@@ -81,7 +81,7 @@ class ToEmailNew(models.Model):
     emailType = models.IntegerField(default=mailConstant.email_type_unset)
 
     def __str__(self):
-        return self.emailId
+        return self.emailId_id
 
     class Meta:
         verbose_name = "Received Email"
@@ -111,7 +111,7 @@ class CcEmailNew(models.Model):
     emailType = models.IntegerField(default=mailConstant.email_type_unset)
 
     def __str__(self):
-        return self.emailId
+        return self.emailId_id
 
     class Meta:
         verbose_name = "CC Received Email"
@@ -141,7 +141,7 @@ class BccEmailNew(models.Model):
     emailType = models.IntegerField(default=mailConstant.email_type_unset)
 
     def __str__(self):
-        return self.emailId
+        return self.emailId_id
 
     class Meta:
         verbose_name = "BCC Received Email"
@@ -243,6 +243,9 @@ class TestClassResult(models.Model):
 class StaCommunication(models.Model):
     staffName1 = models.ForeignKey(StaffName, blank = True, null=True, related_name ='staff1', default=None, on_delete=models.CASCADE)
     staffName2 = models.ForeignKey(StaffName, blank = True, null=True, related_name ='staff2', default=None, on_delete=models.CASCADE)
+    toNumber = models.IntegerField(default=0)
+    ccNumber = models.IntegerField(default=0)
+    bccNumber = models.IntegerField(default=0)
     record = models.TextField()
 
     def __str__(self):

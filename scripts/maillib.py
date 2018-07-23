@@ -4,7 +4,9 @@ from enron.models import EmailWithAlias
 from enron.models import EmailWithStaff
 from enron.models import AnalysisResult
 from enron.models import ToEmailNew,CcEmailNew,BccEmailNew
+from enron.models import StaCommunication
 from .emailconst import mailConstant
+import json
 from multiprocessing import Process
 from django.db import connection
 import os
@@ -365,15 +367,27 @@ def updateReceiverBcc():
             s.save()
         print("endbcc")
 
-def analysis_to_mail():
+def analysis_mail():
     allStaff = StaffName.objects.all()
-    for staff in allStaff:
-        mails = ToEmailNew.objects.filter(senderName=staff)
-        mail_between = mails.filter(emailType=mailConstant.email_type_between)
-        mail_from = mails.filter(emailType=mailConstant.email_type_from)
-        mail_between = mails.filter(emailType=mailConstant.email_type_between)
+    for staff_a in allStaff:
+        for staff_b in allStaff[0:1]:
+            to_mails = ToEmailNew.objects.filter(senderName_id=staff_a.name).filter(receiverName_id=staff_b.name)
+            cc_mails = CcEmailNew.objects.filter(senderName_id=staff_a.name).filter(receiverName_id=staff_b.name)
+            bcc_mails = BccEmailNew.objects.filter(senderName_id=staff_a.name).filter(receiverName_id=staff_b.name)
+            toList = [str(mail) for mail in to_mails];
+            ccList = [str(mail) for mail in cc_mails]
+            bccList = [str(mail) for mail in bcc_mails]
+            result = {"to": toList,
+                      "cc": ccList,
+                      "bcc" : bccList}
+            s =  StaCommunication(staffName1=staff_a,
+                                  staffName2=staff_b,
+                                  toNumber=len(toList),
+                                  ccNumber = len(ccList),
+                                  bccNumber = len(bccList),
+                                  record = json.dumps(result,sort_keys=False))
+            s.save()
 
-    pass
 
 def analysis_cc_mail():
     pass
