@@ -106,8 +106,8 @@ class CcEmailNew(models.Model):
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
     senderAddress = models.CharField(max_length=200)
     receiverAddress = models.CharField(max_length=200)
-    senderName = models.ForeignKey(StaffName, blank=True, null=True,related_name ='sender', default=None, on_delete=models.CASCADE)
-    receiverName = models.ForeignKey(StaffName, blank = True, null=True, related_name ='receiver', default=None, on_delete=models.CASCADE)
+    senderName = models.ForeignKey(StaffName, blank=True, null=True,related_name ='ccnewsender', default=None, on_delete=models.CASCADE)
+    receiverName = models.ForeignKey(StaffName, blank = True, null=True, related_name ='ccnewreceiver', default=None, on_delete=models.CASCADE)
     emailType = models.IntegerField(default=mailConstant.email_type_unset)
 
     def __str__(self):
@@ -136,8 +136,8 @@ class BccEmailNew(models.Model):
     emailId = models.ForeignKey(Email, on_delete=models.CASCADE)
     senderAddress = models.CharField(max_length=200)
     receiverAddress = models.CharField(max_length=200)
-    senderName = models.ForeignKey(StaffName, blank=True, null=True,related_name ='sender', default=None, on_delete=models.CASCADE)
-    receiverName = models.ForeignKey(StaffName, blank = True, null=True, related_name ='receiver', default=None, on_delete=models.CASCADE)
+    senderName = models.ForeignKey(StaffName, blank=True, null=True,related_name ='bccnewsender', default=None, on_delete=models.CASCADE)
+    receiverName = models.ForeignKey(StaffName, blank = True, null=True, related_name ='bccnewreceiver', default=None, on_delete=models.CASCADE)
     emailType = models.IntegerField(default=mailConstant.email_type_unset)
 
     def __str__(self):
