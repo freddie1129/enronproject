@@ -370,7 +370,7 @@ def updateReceiverBcc():
 def analysis_mail():
     allStaff = StaffName.objects.all()
     for staff_a in allStaff:
-        for staff_b in allStaff[0:1]:
+        for staff_b in allStaff:
             to_mails = ToEmailNew.objects.filter(senderName_id=staff_a.name).filter(receiverName_id=staff_b.name)
             cc_mails = CcEmailNew.objects.filter(senderName_id=staff_a.name).filter(receiverName_id=staff_b.name)
             bcc_mails = BccEmailNew.objects.filter(senderName_id=staff_a.name).filter(receiverName_id=staff_b.name)
