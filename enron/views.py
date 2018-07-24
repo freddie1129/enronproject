@@ -28,5 +28,20 @@ def staff_detail(request,staff_name):
 
     pass
 
+def comm_brief(request):
+    staff_list = StaffName.objects.all()
+    brief = []
+    for from_staff in staff_list:
+        brief_row = [];
+        for to_staff in staff_list:
+            comm_between = StaCommunication.objects.filter(staffName1=from_staff).filter(staffName2=to_staff)[0]
+            to_number = comm_between.toNumber
+            cc_number = comm_between.ccNumber
+            bcc_number = comm_between.bccNumber
+            brief_row.append((from_staff.name,to_staff.name, to_number,cc_number,bcc_number))
+        brief.append((from_staff.name,brief_row))
+    contex = {'brief' : brief,
+              'staff_list':[staff.name for staff in staff_list]}
+    return render(request, 'enron/summery.html', contex)
 
 # Create your views here.

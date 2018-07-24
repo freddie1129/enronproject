@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+        }
+    </style>
+</head>
+
+<body>
+<h1>Email Propagation Summery Table </h1>
+<table style="width:100%">
+    <tr>
+        <th></th>
+
+        {% for staffname in staff_list %}
+            <th>{{ staffname }}</th>
+        {% endfor %}
+    </tr>
+    {% for row_data in brief %}
+        <tr>
+            <td>{{ row_data.0 }}</td>
+            {% for cell_data in row_data.1 %}
+                <td>{{ cell_data.0 }},{{ cell_data.1 }},{{ cell_data.2 }},{{ cell_data.3 }},{{ cell_data.4 }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+</body>
+</html>
