@@ -4,9 +4,13 @@ from django.http import HttpResponse
 from django.db.models import Sum
 
 from enron.models import StaffName
+from enron.models import Email
+
 
 
 from enron.models import StaCommunication
+
+import json
 
 def index(request):
     staff_list = StaffName.objects.all()
@@ -29,7 +33,7 @@ def staff_detail(request,staff_name):
     pass
 
 def comm_brief(request):
-    staff_list = StaffName.objects.all()
+    staff_list = StaffName.objects.all()[0:2]
     brief = []
     for from_staff in staff_list:
         brief_row = [];
@@ -43,5 +47,26 @@ def comm_brief(request):
     contex = {'brief' : brief,
               'staff_list':[staff.name for staff in staff_list]}
     return render(request, 'enron/summery.html', contex)
+
+def mail_history(request, staff_from, staff_to):
+    detail_a_b = StaCommunication.objects.filter(staffName1=staff_from).filter(staffName2=staff_to)[0]
+    detail_b_a = StaCommunication.objects.filter(staffName1=staff_to).filter(staffName2=staff_from)[0]
+
+    mailList_a_b = json.loads(detail_a_b.record)
+    mailList_b_a = json.loads(detail_b_a.record)
+
+    a_to_b =  mailList_a_b['to']
+    b_to_a =  mailList_b_a['to']
+
+    a_b_list = [];
+    for emaiId in a_to_b:
+        e =  Email.objects.get(pk=emaiId)
+        a_b_list.append({"id":emaiId,"time": str(e.time)})
+    json.dumps(a_b_list)
+
+    #bcc_emails =  mailList['bcc']
+
+    contex = {"email_collection" : json.dumps(a_b_list)}
+    return render(request,'enron/staffdetail.html',contex)
 
 # Create your views here.

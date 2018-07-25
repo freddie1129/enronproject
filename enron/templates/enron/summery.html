@@ -29,7 +29,7 @@
         <tr>
             <td>{{ row_data.0 }}</td>
             {% for cell_data in row_data.1 %}
-                <td>{{ cell_data.2 }},{{ cell_data.3 }},{{ cell_data.4 }}</td>
+                <td><a href="/enron/{{ cell_data.0 }}/{{ cell_data.1 }}/detail">{{ cell_data.2 }},{{ cell_data.3 }},{{ cell_data.4 }}</a></td>
             {% endfor %}
         </tr>
     {% endfor %}

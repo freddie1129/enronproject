@@ -1,10 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load static %}
 <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+   	<script src="http://d3js.org/d3.v2.js"></script>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
+    <input type="hidden" id="myVar" name="variable" value="{{ email_collection }}">
+    <p id="data"></p>
+    <div id="time"></div>
 
 </body>
+<script src="{% static "enron/staffdetail.js" %}"></script>
 </html>
