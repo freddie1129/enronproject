@@ -9,7 +9,7 @@ from enron.models import StaffName
 from enron.models import StaCommunication
 
 def index(request):
-    staff_list = StaffName.objects.all()[0:2]
+    staff_list = StaffName.objects.all()
     staff_data=[]
     for staff in staff_list:
         staff_list = StaCommunication.objects.filter(staffName1=staff)
