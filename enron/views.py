@@ -33,7 +33,7 @@ def staff_detail(request,staff_name):
     pass
 
 def comm_brief(request):
-    staff_list = StaffName.objects.all()[0:2]
+    staff_list = StaffName.objects.all()[0:10]
     brief = []
     for from_staff in staff_list:
         brief_row = [];
@@ -61,12 +61,27 @@ def mail_history(request, staff_from, staff_to):
     a_b_list = [];
     for emaiId in a_to_b:
         e =  Email.objects.get(pk=emaiId)
-        a_b_list.append({"id":emaiId,"time": str(e.time)})
-    json.dumps(a_b_list)
+        #a_b_list.append({"id":emaiId,"time": str(e.time)})
+        a_b_list.append((True,emaiId,str(e.time)))
+
+    b_a_list = [];
+    for emaiId in b_to_a:
+        e = Email.objects.get(pk=emaiId)
+        # a_b_list.append({"id":emaiId,"time": str(e.time)})
+        a_b_list.append((False,emaiId, str(e.time)))
+    a_b_list = sorted(a_b_list, key=lambda email: email[2])
+
+
+
+    #json.dumps(a_b_list)
 
     #bcc_emails =  mailList['bcc']
 
-    contex = {"email_collection" : json.dumps(a_b_list)}
-    return render(request,'enron/staffdetail.html',contex)
+    #contex = {"email" : json.dumps(a_b_list)}
+    #contex = {"email" : json.dumps(a_b_list)}
+    contex = {"a_email_b" : a_b_list}
+
+
+    return render(request,'enron/a_email_b.html',contex)
 
 # Create your views here.
