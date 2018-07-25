@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% if a_email_b %}
+    <ol>
+    {% for email in a_email_b %}
+        {% if email.0 %}
+            <p class="left_person" style="color:blue;">{{email.2}} &nbsp;&nbsp; {{ email.1 }} </p>
+        {% else %}
+            <p class="right_person" >{{email.2}}</p>
+        {% endif %}
+    {% endfor %}
+    </ol>
+{% else %}
+    <p>No staffs are available.</p>
+{% endif %}
+</body>
+</html>
