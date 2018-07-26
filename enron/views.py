@@ -92,7 +92,7 @@ def mail_history(request, staff_from, staff_to):
 
 def staff(request):
     result = [];
-    staff_list = StaffName.objects.all()[0:5];
+    staff_list = StaffName.objects.all();
     for idx, value in enumerate(staff_list):
         emails = StaffEmail.objects.filter(staffName=value)
         result.append((idx+1, value.name, len(emails), emails[0].emailAddress, [e.emailAddress for e in emails[1:]]))
