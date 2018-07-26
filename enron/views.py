@@ -95,7 +95,10 @@ def staff(request):
     staff_list = StaffName.objects.all();
     for idx, value in enumerate(staff_list):
         emails = StaffEmail.objects.filter(staffName=value)
-        result.append((idx+1, value.name, len(emails), emails[0].emailAddress, [e.emailAddress for e in emails[1:]]))
+        if len(emails) == 1:
+            result.append((idx+1, value.name, len(emails), emails[0].emailAddress, []))
+        else:
+            result.append((idx+1, value.name, len(emails), emails[0].emailAddress, [e.emailAddress for e in emails[1:]]))
     contex = {"staff_list" : result}
     return render(request,'enron/staff.html',contex)
 
