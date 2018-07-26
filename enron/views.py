@@ -106,7 +106,7 @@ def staff(request):
     return render(request,'enron/staff.html',contex)
 
 def emailcontent(request, emailId):
-    maildir = '/root/maildir'
+    maildir = '/root/maildir/'
     email = Email.objects.get(pk=emailId)
     filepath =  maildir + email.path
     file = open(filepath, encoding="ISO-8859-1")
