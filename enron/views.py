@@ -112,7 +112,8 @@ def emailcontent(request, emailId):
     file = open(filepath, encoding="ISO-8859-1")
     text = file.read()
     file.close()
-    contex = {"content": text}
+    contex = {"content": text,
+              "path": filepath}
     return render(request, 'enron/rawcontent.html', contex)
 
     #return HttpResponse(text)
