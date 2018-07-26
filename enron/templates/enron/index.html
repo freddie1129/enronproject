@@ -5,15 +5,9 @@
     <title>Title</title>
 </head>
 <body>
-{% if staff_list %}
-    <ol>
-    {% for staff in staff_list %}
-        <li><a href="{% url 'staffdetail' staff.0.name %}">{{ staff.0.name }}</a></li>
-        <p>&nbsp;&nbsp;Send To Number:&nbsp;{{staff.1}}&nbsp;&nbsp;Cc To Number:&nbsp;{{staff.2}}&nbsp;&nbsp;Bcc To Number:&nbsp;{{staff.3}}</p>
-    {% endfor %}
-    </ol>
-{% else %}
-    <p>No staffs are available.</p>
-{% endif %}
+<h2>Enron Email Dataset Analysis</h2>
+<ol>
+    <li>Staff Name and Email Address Alias Table. <a href="/enron/staff">Enter</a> </li>
+</ol>
 </body>
 </html>

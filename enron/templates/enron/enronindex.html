@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% if staff_list %}
+    <ol>
+    {% for staff in staff_list %}
+        <li><a href="{% url 'staffdetail' staff.0.name %}">{{ staff.0.name }}</a></li>
+        <p>&nbsp;&nbsp;Send To Number:&nbsp;{{staff.1}}&nbsp;&nbsp;Cc To Number:&nbsp;{{staff.2}}&nbsp;&nbsp;Bcc To Number:&nbsp;{{staff.3}}</p>
+    {% endfor %}
+    </ol>
+{% else %}
+    <p>No staffs are available.</p>
+{% endif %}
+</body>
+</html>

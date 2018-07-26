@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <style>
+        table {
+
+            margin: auto;
+            width: 50%;
+        }
+
+        .center {
+            margin: auto;
+
+            padding: 10px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+    </style>
+    <title>Staff</title>
+</head>
+<body>
+
+
+<h2 class="center">Staff Name and Email Address Alias Table</h2>
+
+<table class="table table-bordered" style="width:75%">
+    <tr>
+        <th>No</th>
+        <td>Name</td>
+        <td>Email Address</td>
+    </tr>
+    {% for staff in staff_list %}
+        <tr>
+            <td rowspan="{{ staff.2 }}">{{ staff.0 }}</td>
+            <td rowspan="{{ staff.2 }}">{{ staff.1 }}</td>
+            <td>{{ staff.3 }}</td>
+        </tr>
+        {% for email in staff.4 %}
+            <tr>
+                <td>{{ email }}</td>
+            </tr>
+        {% endfor %}
+    {% endfor %}
+</table>
+</body>
+</html>

@@ -5,6 +5,7 @@ from django.db.models import Sum
 
 from enron.models import StaffName
 from enron.models import Email
+from enron.models import StaffEmail
 
 
 
@@ -23,6 +24,11 @@ def index(request):
         staff_data.append( ( staff, total_to.get('toNumber__sum'), total_cc.get('ccNumber__sum'),total_bcc.get('bccNumber__sum')))
     context = {'staff_list': staff_data}
     return render(request, 'enron/index.html', context)
+
+def home(request):
+    return render(request, 'enron/index.html')
+
+
 
 def staff_detail(request,staff_name):
     staff_list =  StaCommunication.objects.filter(staffName1=staff_name)
@@ -83,5 +89,14 @@ def mail_history(request, staff_from, staff_to):
 
 
     return render(request,'enron/a_email_b.html',contex)
+
+def staff(request):
+    result = [];
+    staff_list = StaffName.objects.all()[0:5];
+    for idx, value in enumerate(staff_list):
+        emails = StaffEmail.objects.filter(staffName=value)
+        result.append((idx+1, value.name, len(emails), emails[0].emailAddress, [e.emailAddress for e in emails[1:]]))
+    contex = {"staff_list" : result}
+    return render(request,'enron/staff.html',contex)
 
 # Create your views here.
