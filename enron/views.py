@@ -38,7 +38,7 @@ def staff_detail(request,staff_name):
 
     pass
 
-def comm_brief(request):
+def summery(request):
     staff_list = StaffName.objects.all()[0:10]
     brief = []
     for from_staff in staff_list:
@@ -104,5 +104,15 @@ def staff(request):
             result.append((idx+1, value.name, len(emails), emails[0].emailAddress, [e.emailAddress for e in emails[1:]]))
     contex = {"staff_list" : result}
     return render(request,'enron/staff.html',contex)
+
+def emailcontent(request, emailId):
+    maildir = '/root/maildir'
+    email = Email.objects.get(pk=emailId)
+    filepath =  maildir + email.path
+    file = open(filepath, encoding="ISO-8859-1")
+    text = file.read()
+    file.close()
+    return HttpResponse(text)
+
 
 # Create your views here.
