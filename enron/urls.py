@@ -8,4 +8,6 @@ urlpatterns = [
     path('<emailId>/emaildetails', views.emailcontent, name='emailcontent'),
     path('<staff_from>/<staff_to>/detail', views.mail_history, name='staffdetail'),
     path('staff/', views.staff, name='staff'),
+    path('<staff_name>/staff', views.staffsummery, name='staffsummery'),
+
 ]

@@ -118,5 +118,19 @@ def emailcontent(request, emailId):
 
     #return HttpResponse(text)
 
-
-# Create your views here.
+def staffsummery(request, staff_name):
+    list =  StaCommunication.objects.filter(staffName1=StaffName.objects.get(pk=staff_name))
+    list_to = list.exclude(toNumber=0)
+    toNumber = list.aggregate(Sum('toNumber'))
+    list_cc = list.exclude(ccNumber=0)
+    ccNumber = list.aggregate(Sum('ccNumber'))
+    list_bcc = list.exclude(bccNumber=0)
+    bccNumber = list.aggregate(Sum('bccNumber'))
+    contex = {"staff_name" : staff_name,
+              "staff_to_num" : toNumber.get('toNumber__sum'),
+              "staff_to_list": list_to,
+              "staff_cc_num" : ccNumber.get('ccNumber__sum'),
+              "staff_cc_list": list_cc,
+              "staff_bcc_num" : bccNumber.get('bccNumber__sum'),
+              "staff_bcc_list": list_bcc,}
+    return render(request,'enron/staff_email_summery.html',contex)

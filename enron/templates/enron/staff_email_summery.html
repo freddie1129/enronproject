@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff summery</title>
+        <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <style>
+        table {
+
+            margin: auto;
+            width: 50%;
+        }
+
+        .center {
+            margin: auto;
+
+            padding: 10px;
+        }
+
+        h1,h2,h3 {
+            text-align: center;
+        }
+        p {
+            margin-left: 20px;
+        }
+
+    </style>
+
+</head>
+<body>
+    <h1>Sending Email Profile  {{ staff_name }} </h1>
+    <p>From: <b>{{ staff_name }}</b></p>
+    <p>Send <b>{{ staff_to_num }}</b> emails to <b>{{ staff_to_list | length}}</b> person &nbsp;<a href="#to_list">see detail</a></p>
+    <p>Cc <b>{{ staff_cc_num }}</b> emails to <b>{{ staff_cc_list | length}}</b> person &nbsp;<a href="#cc_list">see detail</a></p>
+    <p>Bcc <b>{{ staff_bcc_num }}</b> emails to <b>{{ staff_bcc_list | length}}</b> person &nbsp;<a href="#bcc_list">see detail</a></p>
+    <br/>
+    <h3 id="to_list" class="center">To-Receiver List</h3>
+    <table class="table table-bordered" style="width: 50%">
+        <tr>
+            <th>No.</th>
+            <th>Name</th>
+            <th>Number</th>
+        </tr>
+        {% for item in staff_to_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td><a href="{% url 'staffsummery' item.staffName2 %}" >{{ item.staffName2 }}</a></td>
+            <td>{{ item.toNumber }}</td>
+
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h3 id="cc_list" class="center">Cc-Receiver List</h3>
+    <table class="table table-bordered" style="width: 50%">
+        <tr>
+            <th>No.</th>
+            <th>Name</th>
+            <th>Number</th>
+        </tr>
+        {% for item in staff_cc_list %}
+        <tr>
+            <td>{{ forloop.counter0 }}</td>
+            <td><a href="{% url 'staffsummery' item.staffName2 %}" >{{ item.staffName2 }}</a></td>
+            <td>{{ item.ccNumber }}</td>
+
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h3 id="bcc_list" class="center">Bcc-Receiver List</h3>
+    <table class="table table-bordered" style="width: 50%">
+        <tr>
+            <th>No.</th>
+            <th>Name</th>
+            <th>Number</th>
+        </tr>
+        {% for item in staff_bcc_list %}
+        <tr>
+            <td>{{ forloop.counter0 }}</td>
+            <td><a href="{% url 'staffsummery' item.staffName2 %}" >{{ item.staffName2 }}</a></td>
+            <td>{{ item.bccNumber }}</td>
+
+        </tr>
+        {% endfor %}
+    </table>
+
+</body>
+</html>

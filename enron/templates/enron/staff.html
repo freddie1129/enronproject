@@ -45,7 +45,7 @@
     {% for staff in staff_list %}
         <tr>
             <td rowspan="{{ staff.2 }}">{{ staff.0 }}</td>
-            <td rowspan="{{ staff.2 }}">{{ staff.1 }}</td>
+            <td rowspan="{{ staff.2 }}"><a href="{% url 'staffsummery' staff.1 %}" >{{ staff.1 }}</a></td>
             <td>{{ staff.3 }}</td>
         </tr>
         {% for email in staff.4 %}
