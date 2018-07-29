@@ -8,7 +8,8 @@
 <ol></ol>
 {% for dirname in staff_name_list %}
     <li>{{ dirname }}</li>
-    <a href="{% url 'sta_same_timestamp' dirname %}">{{ dirname }}</a>
+    <p>Checkout the emails having the same timestamp in the <a href="{% url 'sta_same_timestamp' dirname %}">{{ dirname }}</a> directory</p>
+
 {% endfor %}
 </ol>
 </body>
