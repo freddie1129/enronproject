@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% load enron_extras %}
+<h3>The emails with the same timestamp in the directory <b>{{ dir_name }}</b> as below: </h3>
+{% for row in list %}
+    <p><b>----{{ forloop.counter }}----</b></p>
+    <p>>><b>Time:</b> {{ row.1|date:'Y-m-d H:i' }}</p>
+    <p>>><b>Number:</b>{{ row.0 }}</p>
+    {% with row.2|split as email_id_list %}
+    {% for email_id in email_id_list %}
+        <p><a href="{% url 'emailcontent' email_id %}">{{ email_id }}</a></p>
+    {% endfor %}
+    {% endwith %}
+{% endfor %}
+</body>
+</html>

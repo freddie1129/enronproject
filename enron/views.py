@@ -2,10 +2,12 @@ from django.shortcuts import render
 
 from django.http import HttpResponse
 from django.db.models import Sum
+from django.db.models import Count
 
 from enron.models import StaffName
 from enron.models import Email
 from enron.models import StaffEmail
+from django.db import connection
 
 
 
@@ -116,8 +118,6 @@ def emailcontent(request, emailId):
               "path": filepath}
     return render(request, 'enron/rawcontent.html', contex)
 
-    #return HttpResponse(text)
-
 def staffsummery(request, staff_name):
     list =  StaCommunication.objects.filter(staffName1=StaffName.objects.get(pk=staff_name))
     list_to = list.exclude(toNumber=0)
@@ -134,3 +134,32 @@ def staffsummery(request, staff_name):
               "staff_bcc_num" : bccNumber.get('bccNumber__sum'),
               "staff_bcc_list": list_bcc,}
     return render(request,'enron/staff_email_summery.html',contex)
+
+def dirlist(request):
+    list = StaffName.objects.all();
+    contex ={ "staff_name_list" :  [staff.name for staff in list]}
+
+    return render(request,'enron/dirlist.html',contex)
+
+
+def my_custom_sql(name):
+    #"arora-h%"
+    with connection.cursor() as cursor:
+        cursor.execute("select count(time), time, group_concat(emailId) from enron_email WHERE path like \'{0}%\' group by time order by count(time) desc".format(name))
+        row = cursor.fetchall()
+    return row
+
+def sta_same_timestamp(request, dirname):
+    emaillist =  Email.objects.filter(path__istartswith=dirname)
+    #list = emaillist.values('time').annotate(dcount=Count('time')).order_by('-dcount')
+    #list_content = emaillist.values('content').annotate(dcount=Count('content')).order_by('-dcount')
+    id_list = my_custom_sql(name=dirname)
+
+    #context = { 'list' : [(row.get('time'), row.get('dcount')) for row in list]}
+    context = {'dir_name' : dirname,
+        'list' : id_list}
+
+
+
+
+    return render(request,'enron/sta_same_timestamp.html',context)

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<ol></ol>
+{% for dirname in staff_name_list %}
+    <li>{{ dirname }}</li>
+    <a href="{% url 'sta_same_timestamp' dirname %}">{{ dirname }}</a>
+{% endfor %}
+</ol>
+</body>
+</html>

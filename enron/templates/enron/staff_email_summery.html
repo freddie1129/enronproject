@@ -85,7 +85,7 @@
         </tr>
         {% for item in staff_bcc_list %}
         <tr>
-            <td>{{ forloop.counter0 }}</td>
+            <td>{{ forloop.counter }}</td>
             <td><a href="{% url 'staffsummery' item.staffName2 %}" >{{ item.staffName2 }}</a></td>
             <td>{{ item.bccNumber }}</td>
 
