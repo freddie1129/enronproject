@@ -13,7 +13,7 @@ def run():
     alias()
 
 def alias():
-    staff_list =  StaffName.objects.all()[0:1]
+    staff_list =  StaffName.objects.all()
     for index, staff in enumerate(staff_list):
         print("{0}:{1}**************************".format(index+1,staff.name))
         first_name = staff.name.split('-')[0]
