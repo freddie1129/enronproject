@@ -92,20 +92,33 @@ def mail_history(request, staff_from, staff_to):
 
     return render(request,'enron/a_email_b.html',contex)
 
-def staff(request):
-    result = [];
+# def staff_alias(request):
+#     staff_list = StaffName.objects.all()
+#     result = []
+#     for idx, value in enumerate(staff_list):
+#         with connection.cursor() as cursor:
+#             cursor.execute("SELECT * FROM enron_staffemail WHERE id IN(SELECT MAX(id) FROM enron_staffemail WHERE staffName_id = %s GROUP BY emailAddress)", [value.name])
+#             emails = cursor.fetchall()
+#         if len(emails) == 0:
+#             result.append((value.name, [('NA','untrusted')]))
+#             continue
+#         result.append((value.name, [(e[1], e[3]) for e in emails]))
+#     contex = {"staff_list" : result}
+#     return render(request, 'enron/staff-alias.html', contex)
+
+
+def staff_alias(request):
     staff_list = StaffName.objects.all()
+    result = []
     for idx, value in enumerate(staff_list):
         emails = StaffEmail.objects.filter(staffName=value)
         if len(emails) == 0:
-            result.append((idx+1, value.name, 1, 'NA', []))
+            result.append((value.name, [('NA','untrusted')]))
             continue
-        if len(emails) == 1:
-            result.append((idx+1, value.name, len(emails), emails[0].emailAddress, []))
-        else:
-            result.append((idx+1, value.name, len(emails), emails[0].emailAddress, [e.emailAddress for e in emails[1:]]))
+        result.append((value.name, [(e.emailAddress, e.type) for e in emails]))
     contex = {"staff_list" : result}
-    return render(request,'enron/staff.html',contex)
+    return render(request, 'enron/staff-alias.html', contex)
+
 
 def emailcontent(request, emailId):
     maildir = '/root/maildir/'

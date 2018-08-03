@@ -28,9 +28,29 @@ class StaffName(models.Model):
         verbose_name_plural = "Enron Staffs"
 
 
+class Aliasf(models.Model):
+    staff = models.ForeignKey(StaffName, on_delete=models.CASCADE)
+    emailAddress = models.CharField(max_length=64)
+    type = models.CharField(blank=True, null=True,default=None,max_length=16)
+    number = models.IntegerField(default=0)
+    isTrust = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.emailAddress
+
+class Alias(models.Model):
+        staff = models.ForeignKey(StaffName, on_delete=models.CASCADE)
+        emailAddress = models.CharField(max_length=64)
+        isTrust = models.BooleanField(default=True)
+
+        def __str__(self):
+            return self.emailAddress
+
+
 class StaffEmail(models.Model):
     emailAddress = models.CharField(max_length=64)
     staffName = models.ForeignKey(StaffName, on_delete=models.CASCADE)
+    type = models.CharField(default=mailConstant.alias_type_intrusted, max_length=16)
 
     def __str__(self):
         return self.staffName + ":" + self.emailAddress
@@ -55,6 +75,7 @@ class Email(models.Model):
     class Meta:
         verbose_name = "Sended Email"
         verbose_name_plural = "Sended Emails"
+
 
 
 class ToEmail(models.Model):

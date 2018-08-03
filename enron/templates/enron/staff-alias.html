@@ -41,18 +41,24 @@
         <th>No</th>
         <td>Name</td>
         <td>Email Address</td>
+        <td>Type</td>
+
     </tr>
     {% for staff in staff_list %}
         <tr>
-            <td rowspan="{{ staff.2 }}">{{ staff.0 }}</td>
-            <td rowspan="{{ staff.2 }}"><a href="{% url 'staffsummery' staff.1 %}" >{{ staff.1 }}</a></td>
-            <td>{{ staff.3 }}</td>
+            <td rowspan="{{ staff.1 | length }}">{{ forloop.counter }}</td>
+            <td rowspan="{{ staff.1 | length }}"><a href="{% url 'staffsummery' staff.0 %}" >{{ staff.0 }}</a></td>
+            <td>{{ staff.1.0.0 }}</td>
+            <td>{{ staff.1.0.1 }}</td>
         </tr>
-        {% for email in staff.4 %}
+        {% for email,type in staff.1|slice:"1:" %}
             <tr>
                 <td>{{ email }}</td>
+                <td>{{ type }}</td>
+
             </tr>
         {% endfor %}
+
     {% endfor %}
 </table>
 </body>

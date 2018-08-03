@@ -13,5 +13,10 @@ class mailConstant:
     email_type_to = 2
     email_type_between = 3
 
+    alias_type_trusted = "trusted"
+    alias_type_intrusted = "intrusted"
+
+
+
 
     string_unknown = "unkonwn"
