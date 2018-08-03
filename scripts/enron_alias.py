@@ -14,16 +14,28 @@ def run():
 
 def alias():
     staff_list =  StaffName.objects.all()
-    staff_list =  [StaffName.objects.get(pk='crandall-s'),StaffName.objects.get(pk='gilbert-smith-d'),
-                   StaffName.objects.get(pk='merris-s'),StaffName.objects.get(pk='rodrigue-r'),
+    staff_list =  [StaffName.objects.get(pk='crandall-s'),
+                   StaffName.objects.get(pk='rodrigue-r'),
                    StaffName.objects.get(pk='clair-c')]
 
     for index, staff in enumerate(staff_list):
         print("{0}:{1}**************************".format(index+1,staff.name))
         first_name = staff.name.split('-')[0]
         address_keyword = "@enron.com"
-        staff_sender = ToEmailNew.objects.filter(Q(emailId__path__startswith=first_name) & Q(senderAddress__contains=first_name) & Q(senderAddress__contains=address_keyword))
-        staff_receiver = ToEmailNew.objects.filter(Q(emailId__path__startswith=first_name) & Q(receiverAddress__contains=first_name) & Q(receiverAddress__contains=address_keyword))
+        pathkey=''
+        if (first_name == 'crandall'):
+            pathkey = 'crandell-s'
+        elif (first_name=='rodrigue'):
+            pathkey = 'rodrique-r'
+        elif (first_name == 'clair'):
+            pathkey = 'stclair-c'
+        elif (first_name == 'merris'):
+            pathkey = 'merriss-s'
+        else:
+            pathkey = first_name;
+
+        staff_sender = ToEmailNew.objects.filter(Q(emailId__path__startswith=pathkey) & Q(senderAddress__contains=first_name) & Q(senderAddress__contains=address_keyword))
+        staff_receiver = ToEmailNew.objects.filter(Q(emailId__path__startswith=pathkey) & Q(receiverAddress__contains=first_name) & Q(receiverAddress__contains=address_keyword))
         sender_alias = staff_sender.values('senderAddress').annotate(number = Count("senderAddress"))
         receiver_alias = staff_receiver.values('receiverAddress').annotate(number = Count("receiverAddress"))
         list_sender_email = [Aliasf(staff=staff,emailAddress = a["senderAddress"], type = "send", number = a["number"]) for a in sender_alias]
