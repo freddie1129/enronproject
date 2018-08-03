@@ -5,6 +5,9 @@ from django.db.models import Sum
 from django.db.models import Count
 
 from enron.models import StaffName
+from enron.models import Alias
+from enron.models import Aliasf
+
 from enron.models import Email
 from enron.models import StaffEmail
 from django.db import connection
@@ -116,6 +119,18 @@ def staff_alias(request):
             result.append((value.name, [('NA','untrusted')]))
             continue
         result.append((value.name, [(e.emailAddress, e.type) for e in emails]))
+    contex = {"staff_list" : result}
+    return render(request, 'enron/staff-alias.html', contex)
+
+def staff_alias_a(request):
+    staff_list = StaffName.objects.all()
+    result = []
+    for idx, staff in enumerate(staff_list):
+        emails = Alias.objects.filter(staff=staff)
+        if len(emails) == 0:
+            result.append((staff.name, [('NA',False)]))
+            continue
+        result.append((staff.name, [(e.emailAddress, e.isTrust) for e in emails]))
     contex = {"staff_list" : result}
     return render(request, 'enron/staff-alias.html', contex)
 

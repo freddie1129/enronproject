@@ -14,6 +14,10 @@ def run():
 
 def alias():
     staff_list =  StaffName.objects.all()
+    staff_list =  [StaffName.objects.get(pk='crandall-s'),StaffName.objects.get(pk='gilbert-smith-d'),
+                   StaffName.objects.get(pk='merris-s'),StaffName.objects.get(pk='rodrigue-r'),
+                   StaffName.objects.get(pk='clair-c')]
+
     for index, staff in enumerate(staff_list):
         print("{0}:{1}**************************".format(index+1,staff.name))
         first_name = staff.name.split('-')[0]
