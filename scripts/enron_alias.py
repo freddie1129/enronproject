@@ -14,7 +14,7 @@ def run():
     alias()
 
 def alias():
-    staff_list =  StaffName.objects.all()[0:1]
+    staff_list =  StaffName.objects.all()
     #staff_list =  [StaffName.objects.get(pk='crandall-s'),
     #               StaffName.objects.get(pk='rodrigue-r'),
     #               StaffName.objects.get(pk='clair-c')]
