@@ -124,6 +124,7 @@ def staff_alias(request):
 
 def staff_alias_a(request):
     staff_list = StaffName.objects.all()
+
     result = []
     for idx, staff in enumerate(staff_list):
         emails = Alias.objects.filter(staff=staff)
@@ -145,6 +146,14 @@ def emailcontent(request, emailId):
     contex = {"content": text,
               "path": filepath}
     return render(request, 'enron/rawcontent.html', contex)
+
+
+def alais_process_log(request):
+    filepath = './static/alias.log'
+    file = open(filepath, encoding="ISO-8859-1")
+    text = file.read()
+    file.close()
+    return HttpResponse(text)
 
 def staffsummery(request, staff_name):
     list =  StaCommunication.objects.filter(staffName1=StaffName.objects.get(pk=staff_name))

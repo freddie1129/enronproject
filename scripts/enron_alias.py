@@ -15,6 +15,10 @@ def run():
 
 def alias():
     staff_list =  StaffName.objects.all()
+    staff_list = [StaffName.objects.get(pk='mims-thurston-p'),
+
+                  ]
+    #StaffName.objects.get(pk='williams-w3'),
     #staff_list =  [StaffName.objects.get(pk='crandall-s'),
     #               StaffName.objects.get(pk='rodrigue-r'),
     #               StaffName.objects.get(pk='clair-c')]
@@ -22,22 +26,14 @@ def alias():
 
     for index, staff in enumerate(staff_list):
         print("{0}:{1}**************************".format(index+1,staff.name))
-        first_name = staff.name.rsplit('-',1)[0]
-        last_name = staff.name.rsplit('-',1)[1]
+        first_name = staff.aliasName.split('-')[0]
+        last_name = staff.aliasName.split('-')[-1]
+        print(first_name)
+        print(last_name)
         address_keyword = "@enron.com"
         pathkey=''
-        if (first_name == 'crandall'):
-            pathkey = 'crandell'
-        elif (first_name=='rodrigue'):
-            pathkey = 'rodrique'
-        elif (first_name == 'clair'):
-            pathkey = 'stclair'
-        elif (first_name == 'merris'):
-            pathkey = 'merriss'
-        elif (first_name =='gilbert-smith'):
-            pathkey = 'gilbertsmith'
-        else:
-            pathkey = first_name
+
+        pathkey = staff.name
 
         regex = ".*{0}+.*{1}+@enron.com".format(last_name, first_name)
         #staff_sender = ToEmailNew.objects.filter(Q(emailId__path__startswith=pathkey) & Q(senderAddress__contains=first_name) & Q(senderAddress__contains=address_keyword))
