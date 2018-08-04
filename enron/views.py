@@ -155,7 +155,10 @@ def alais_process_log(request):
     file = open(filepath, encoding="ISO-8859-1")
     text = file.read()
     file.close()
-    return HttpResponse(text)
+    contex = {"content": text,
+              "path": filepath}
+    return render(request, 'enron/rawcontent.html', contex)
+  
 
 def staffsummery(request, staff_name):
     list =  StaCommunication.objects.filter(staffName1=StaffName.objects.get(pk=staff_name))
