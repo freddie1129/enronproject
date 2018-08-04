@@ -12,6 +12,8 @@ from enron.models import Email
 from enron.models import StaffEmail
 from django.db import connection
 
+import os
+
 
 
 from enron.models import StaCommunication
@@ -149,7 +151,7 @@ def emailcontent(request, emailId):
 
 
 def alais_process_log(request):
-    filepath = '.enron/static/enron/alias.enronlog'
+    filepath = os.getcwd() +  '/enron/static/enron/alias.enronlog'
     file = open(filepath, encoding="ISO-8859-1")
     text = file.read()
     file.close()
