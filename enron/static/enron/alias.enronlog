@@ -1,0 +1,18 @@
+Four cases:
+1.The name of directory is wrong.
+	crandell-s   ----->    crandall-s
+        merriss-s    ----->    merris-s
+        rodrique-r   ----->    rodrigue-r
+        stclair-c    ----->    clair-c
+	williams-w3  ----->    williams-bill or williams-b	
+
+2.gilbertsmith-d
+	There is no any email sent or received for the email address which contains the word gilbertsmith. After check the emails in the sent directory, his real email address is doug.gilbert-smith@enron.com, so I think this person has a middle name in this full name, and the keyword using for checking out the email address should be gilbert-smith, so chang the directory name as:
+	gilbertsmith-d ---->gilbert-smith-d
+
+3.Two directories are belong to the same person
+	After checking the sent directory, both whalley-l and whalley-g are belong to whalley-greg.
+	And both phanis-s and panus-s are belong to panus-s   
+	So delete whalley-l and phanis-s from the StaffName table. 
+4. mims-thurston-p
+
