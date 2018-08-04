@@ -149,7 +149,7 @@ def emailcontent(request, emailId):
 
 
 def alais_process_log(request):
-    filepath = './static/alias.log'
+    filepath = '.enron/static/enron/alias.enronlog'
     file = open(filepath, encoding="ISO-8859-1")
     text = file.read()
     file.close()
