@@ -11,5 +11,5 @@ urlpatterns = [
     path('<staff_name>/staff', views.staffsummery, name='staffsummery'),
     path('dirlist', views.dirlist, name='dirlist'),
     path('dirlist/<dirname>', views.sta_same_timestamp, name='sta_same_timestamp'),
-    path('staff-alias/log', views.alais_process_log, name='alais_log'),
+    path('staff-alias/log', views.alais_process_log, name='alais-log'),
 ]
