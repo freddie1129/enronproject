@@ -128,9 +128,9 @@ def staff_alias_a(request):
     for idx, staff in enumerate(staff_list):
         emails = Alias.objects.filter(staff=staff)
         if len(emails) == 0:
-            result.append((staff.name, [('NA',False)]))
+            result.append((staff.aliasName, [('NA',False)]))
             continue
-        result.append((staff.name, [(e.emailAddress, e.isTrust) for e in emails]))
+        result.append((staff.aliasName, [(e.emailAddress, e.isTrust) for e in emails]))
     contex = {"staff_list" : result}
     return render(request, 'enron/staff-alias.html', contex)
 

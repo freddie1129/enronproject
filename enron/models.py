@@ -19,6 +19,8 @@ class Choice(models.Model):
 
 class StaffName(models.Model):
     name = models.CharField(max_length=64,primary_key=True)
+    aliasName = models.CharField(blank=True,null=True,default=None, max_length=64)
+
 
     def __str__(self):
         return self.name
