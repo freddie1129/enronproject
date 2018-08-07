@@ -23,38 +23,38 @@ def pro(filepath):
     file.close()
     email = RawEmail()
     text =  text.split("Message-ID:",1)
-    text = text[1].split("Date:",1)
+    text = text[1].split("\nDate:",1)
     email.e_id = text[0].strip()
-    text =  text[1].split("From:",1)
+    text =  text[1].split("\nFrom:",1)
     email.e_date = text[0].strip()
-    text = text[1].split("To:",1)
+    text = text[1].split("\nTo:",1)
     if (len(text) == 2):
         email.e_from = text[0].strip()
-        text = text[1].split("Subject:", 1)
+        text = text[1].split("\nSubject:", 1)
         email.e_to = text[0].strip()
-        text = text[1].split("Cc:", 1)
+        text = text[1].split("\nCc:", 1)
     else:
-        text = text[0].split("Subject:", 1)
+        text = text[0].split("\nSubject:", 1)
         email.e_from = text[0].strip()
         email.e_to=""
-        text = text[1].split("Cc:", 1)
+        text = text[1].split("\nCc:", 1)
 
     if (len(text) == 2):
         email.e_subject = text[0].strip()
-        text = text[1].split("Mime-Version:", 1)
+        text = text[1].split("\nMime-Version:", 1)
         email.e_cc = text[0].strip()
     else:
-        text = text[0].split("Mime-Version:", 1)
+        text = text[0].split("\nMime-Version:", 1)
         email.e_subject = text[0].strip()
         email.e_cc=""
-    text = text[1].split("Content-Type:",1)
+    text = text[1].split("\nContent-Type:",1)
     email.e_mime = text[0].strip()
-    text = text[1].split("Content-Transfer-Encoding:",1)
+    text = text[1].split("\nContent-Transfer-Encoding:",1)
     email.e_type = text[0].strip()
-    text = text[1].split("Bcc:",1)
+    text = text[1].split("\nBcc:",1)
     if (len(text) == 2):
         email.e_encoding = text[0].strip()
-        text = text[1].split("X-From:",1)
+        text = text[1].split("\nX-From:",1)
         email.e_bcc = text[0].strip()
     else:
         text = text[0].split("X-From:",1)
