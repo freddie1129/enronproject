@@ -32,11 +32,13 @@ def pro(filepath):
         email.e_from = text[0].strip()
         text = text[1].split("Subject:", 1)
         email.e_to = text[0].strip()
+        text = text[1].split("Cc:", 1)
     else:
         text = text[0].split("Subject:", 1)
-        email.e_subject = text[0].strip()
+        email.e_from = text[0].strip()
         email.e_to=""
-    text = text[1].split("Cc:",1)
+        text = text[1].split("Cc:", 1)
+
     if (len(text) == 2):
         email.e_subject = text[0].strip()
         text = text[1].split("Mime-Version:", 1)
