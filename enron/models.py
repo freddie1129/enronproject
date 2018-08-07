@@ -49,6 +49,7 @@ class Alias(models.Model):
             return self.emailAddress
 
 
+
 class StaffEmail(models.Model):
     emailAddress = models.CharField(max_length=64)
     staffName = models.ForeignKey(StaffName, on_delete=models.CASCADE)
@@ -77,6 +78,31 @@ class Email(models.Model):
     class Meta:
         verbose_name = "Sended Email"
         verbose_name_plural = "Sended Emails"
+
+
+class RawEmail(models.Model):
+    e_id = models.CharField(max_length=100,primary_key=True)
+    e_date = models.TextField(blank=True, null=True, default=None)
+    e_from = models.TextField(blank=True, null=True, default=None)
+    e_to = models.TextField(blank=True, null=True, default=None)
+    e_subject = models.TextField(blank=True, null=True, default=None)
+    e_cc = models.TextField(blank=True, null=True, default=None)
+    e_mime = models.TextField(blank=True, null=True, default=None)
+    e_type = models.TextField(blank=True, null=True, default=None)
+    e_encoding = models.TextField(blank=True, null=True, default=None)
+    e_bcc = models.TextField(blank=True, null=True, default=None)
+    e_x_from = models.TextField(blank=True, null=True, default=None)
+    e_x_to = models.TextField(blank=True, null=True, default=None)
+    e_x_cc = models.TextField(blank=True, null=True, default=None)
+    e_x_bcc = models.TextField(blank=True, null=True, default=None)
+    e_x_folder = models.TextField(blank=True, null=True, default=None)
+    e_x_origin = models.TextField(blank=True, null=True, default=None)
+    e_x_filename =  models.TextField(blank=True, null=True, default=None)
+    e_content =  models.TextField(blank=True, null=True, default=None)
+    e_path = models.CharField(max_length=128,blank=True, null=True, default=None)
+
+    def __str__(self):
+        return self.emailId
 
 
 
