@@ -14,9 +14,7 @@ def run():
                 print(filepath)
                 logfile.write(filepath)
                 logfile.write('\n')
-                continue
             pro(filepath)
-            return
 
 
 def pro(filepath):
@@ -30,9 +28,14 @@ def pro(filepath):
     text =  text[1].split("From:",1)
     email.e_date = text[0].strip()
     text = text[1].split("To:",1)
-    email.e_from = text[0].strip()
-    text = text[1].split("Subject:",1)
-    email.e_to = text[0].strip()
+    if (len(text) == 2):
+        email.e_from = text[0].strip()
+        text = text[1].split("Subject:", 1)
+        email.e_to = text[0].strip()
+    else:
+        text = text[0].split("Subject:", 1)
+        email.e_subject = text[0].strip()
+        email.e_to=""
     text = text[1].split("Cc:",1)
     if (len(text) == 2):
         email.e_subject = text[0].strip()
