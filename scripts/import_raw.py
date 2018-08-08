@@ -101,8 +101,8 @@ def pro(filepath):
     email.e_x_folder = text[0].strip()
     text = text[1].split("X-FileName:",1)
     email.e_x_origin = text[0].strip()
-    text = text[1].split("\n",1)
-    email.e_x_filename = text[0].strip()
+    #text = text[1].split("\n",1)
+    email.e_x_filename = text[1].strip()
     #email.e_content = text[1].strip()
     email.e_path = filepath.split(mailpath)[1]
     #print(email.e_path)
