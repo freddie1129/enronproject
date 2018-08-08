@@ -48,7 +48,7 @@ def pro(filepath):
     email = RawEmail()
 
     con = text.split("X-FileName:", 1)
-    email.e_content = con[1]
+    #email.e_content = con[1]
     text = con[0]
     text =  text.split("Message-ID:",1)
     text = text[1].split("\nDate:",1)
@@ -101,9 +101,9 @@ def pro(filepath):
     email.e_x_folder = text[0].strip()
     text = text[1].split("X-FileName:",1)
     email.e_x_origin = text[0].strip()
-    #text = text[1].split("\n",1)
+    text = con[1].split("\n",1)
     email.e_x_filename = text[1].strip()
-    #email.e_content = text[1].strip()
+    email.e_content = text[1].strip()
     email.e_path = filepath.split(mailpath)[1]
     #print(email.e_path)
     email.save()
