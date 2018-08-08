@@ -48,6 +48,7 @@ def pro(filepath):
         text = text[0].split("\nMime-Version:", 1)
         email.e_subject = text[0].strip()
         email.e_cc=""
+    print(text)
     text = text[1].split("\nContent-Type:",1)
     email.e_mime = text[0].strip()
     text = text[1].split("\nContent-Transfer-Encoding:",1)
