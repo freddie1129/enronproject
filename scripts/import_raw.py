@@ -15,6 +15,7 @@ def run():
                 print(filepath)
                 logfile.write(filepath)
                 logfile.write('\n')
+                continue
             pro(filepath)
 
 
