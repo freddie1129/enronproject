@@ -9,6 +9,7 @@ def run():
     for root, dirs, files in os.walk(mailpath):
         for name in files:
             filepath = os.path.join(root, name)
+            print(filepath)
             fs = os.path.getsize(filepath)
             if fs > oneMb:
                 print(filepath)
