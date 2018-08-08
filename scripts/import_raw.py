@@ -18,11 +18,38 @@ def run():
             pro(filepath)
 
 
+# def pro1(filepath):
+#     file = open(filepath,encoding="ISO-8859-1")
+#     text = file.read()
+#     file.close()
+#     email = RawEmail()
+#     con = text.split("X-FileName:",1)
+#     header = con[0]
+#     content = con[1]
+#     text = header.split("Message-ID:",1)
+#     text = text[1].split("\nDate:",1)
+#     email.e_id = text[0].strip()
+#     text = text
+#
+#
+#
+#     content =  text.split("X-FileName:",1)[0]
+#
+#
+#
+#
+#     text = text.find("Message-ID:",1                  )
+#     text = text[1].split()
+
 def pro(filepath):
     file = open(filepath, encoding="ISO-8859-1")
     text = file.read()
     file.close()
     email = RawEmail()
+
+    con = text.split("X-FileName:", 1)
+    email.e_content = con[1]
+    text = con[0]
     text =  text.split("Message-ID:",1)
     text = text[1].split("\nDate:",1)
     email.e_id = text[0].strip()
@@ -48,7 +75,7 @@ def pro(filepath):
         text = text[0].split("\nMime-Version:", 1)
         email.e_subject = text[0].strip()
         email.e_cc=""
-    print(text)
+    #print(text)
     text = text[1].split("\nContent-Type:",1)
     email.e_mime = text[0].strip()
     text = text[1].split("\nContent-Transfer-Encoding:",1)
@@ -76,7 +103,7 @@ def pro(filepath):
     email.e_x_origin = text[0].strip()
     text = text[1].split("\n",1)
     email.e_x_filename = text[0].strip()
-    email.e_content = text[1].strip()
+    #email.e_content = text[1].strip()
     email.e_path = filepath.split(mailpath)[1]
     #print(email.e_path)
     email.save()
