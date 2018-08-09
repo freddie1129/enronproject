@@ -9,7 +9,7 @@ def run():
     for root, dirs, files in os.walk(mailpath):
         for name in files:
             filepath = os.path.join(root, name)
-            #print(filepath)
+            print(filepath)
             fs = os.path.getsize(filepath)
             if fs > oneMb:
                 print(filepath)
@@ -107,6 +107,7 @@ def pro(filepath):
     email.e_content = text[1].strip()
     email.e_path = filepath.split(mailpath)[1]
     #print(email.e_path)
+    #print(email.e_x_from)
     email.save()
     #print(email.e_id)
     # print(email.e_date)
