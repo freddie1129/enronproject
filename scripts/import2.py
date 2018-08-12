@@ -32,5 +32,6 @@ def run():
 
         if (index % 1000 == 0):
             print("Number: {0}\n".format(index))
+        index += 1
 
     print("Processing End\n")
