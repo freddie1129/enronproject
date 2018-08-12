@@ -4,9 +4,9 @@ from enron.models import RawEmail,RawEmailTo,RawEmailCc,RawEmailBCc
 
 def run():
     email_list = RawEmail.objects.all()
-    email_number = len(email_list)
-    print("Start: {0}\n".format(email_number))
-    i = 0
+    #email_number = Rawemail.objects.count();
+    #print("Start: {0}\n".format(email_number))
+    print("Start: {0}\n".format(RawEmail.objects.count()))
     for index, email in enumerate(email_list):
         #email = email_list[i]
         #str = "Tue, 28 Nov 2000 04:50:00 -0800 (PST)"
