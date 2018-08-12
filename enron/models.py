@@ -102,7 +102,56 @@ class RawEmail(models.Model):
     e_path = models.CharField(max_length=128,blank=True, null=True, default=None)
 
     def __str__(self):
-        return self.emailId
+        return self.e_id
+
+
+class RawEmailFrom(models.Model):
+    e_id =  models.ForeignKey(RawEmail, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_subject = models.CharField(blank=True, null=True, default=None,max_length=500)
+    e_mime = models.CharField(blank=True, null=True, default=None,max_length=200)
+    e_type = models.CharField(blank=True, null=True, default=None,max_length=200)
+    e_encoding = models.CharField(blank=True, null=True, default=None,max_length=200)
+    e_x_folder = models.CharField(blank=True, null=True, default=None,max_length=200)
+    e_x_origin = models.CharField(blank=True, null=True, default=None,max_length=200)
+    e_x_filename =  models.CharField(blank=True, null=True, default=None,max_length=200)
+    e_content =  models.TextField(blank=True, null=True, default=None,max_length=200)
+    e_path = models.CharField(blank=True, null=True, default=None,max_length=200)
+
+    def __str__(self):
+        return self.e_id
+
+
+
+class RawEmailTo(models.Model):
+    e_id =  models.ForeignKey(RawEmail, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+
+    def __str__(self):
+        return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
+
+class RawEmailCc(models.Model):
+    e_id =  models.ForeignKey(RawEmail, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+
+
+    def __str__(self):
+        return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
+
+
+class RawEmailBCc(models.Model):
+    e_id =  models.ForeignKey(RawEmail, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+
+    def __str__(self):
+        return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
+
 
 
 
