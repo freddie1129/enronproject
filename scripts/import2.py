@@ -5,9 +5,10 @@ from enron.models import RawEmail,RawEmailTo,RawEmailCc,RawEmailBCc
 def run():
     email_list = RawEmail.objects.all()
     email_number = len(email_list)
+    print("Start: {0}\n".format(email_number))
     i = 0
-    while i < email_number:
-        email = email_list[i]
+    for index, email in enumerate(email_list):
+        #email = email_list[i]
         #str = "Tue, 28 Nov 2000 04:50:00 -0800 (PST)"
         re_date = re.compile(r"(?P<date>\w\w\w, \d{1,2} \w\w\w \d\d\d\d \d\d:\d\d:\d\d [+-]\d\d\d\d).*")
         m = re_date.match(email.e_date.strip())
@@ -26,8 +27,7 @@ def run():
         email_bcc_list = [RawEmailTo(e_id=email,e_date = mail_date, e_from=email.e_from.strip(),e_to = to_addr) for to_addr in e_bcc_list]
         RawEmailBCc.objects.bulk_create(email_bcc_list)
 
-        i += 1
-        if (i % 1000 == 0):
-            print("Number: {0}\n".format(i))
+        if (index % 1000 == 0):
+            print("Number: {0}\n".format(index))
 
     print("Processing End\n")
