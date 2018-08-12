@@ -6,9 +6,12 @@ def run():
     email_list = RawEmail.objects.all()
     #email_number = Rawemail.objects.count();
     #print("Start: {0}\n".format(email_number))
-    print("Start: {0}\n".format(RawEmail.objects.count()))
-    for index, email in enumerate(email_list):
-        #email = email_list[i]
+    #print("Start: {0}\n".format(RawEmail.objects.count()))
+
+    #for index, email in enumerate(email_list):
+    index = 0
+    while index < 517401:
+        email = email_list[index]
         #str = "Tue, 28 Nov 2000 04:50:00 -0800 (PST)"
         re_date = re.compile(r"(?P<date>\w\w\w, \d{1,2} \w\w\w \d\d\d\d \d\d:\d\d:\d\d [+-]\d\d\d\d).*")
         m = re_date.match(email.e_date.strip())
