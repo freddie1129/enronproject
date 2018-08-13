@@ -9,17 +9,21 @@ mailpath = "/root/maildir/"
 def run():
     logpath = "import1.log"
     logfile = open(logpath,'w')
+    index = 0
     for root, dirs, files in os.walk(mailpath):
         for name in files:
             filepath = os.path.join(root, name)
-            print(filepath)
+            #print(filepath)
             fs = os.path.getsize(filepath)
             if fs > oneMb:
                 print(filepath)
                 logfile.write(filepath)
                 logfile.write('\n')
-                continue
+                #continue
             pro(filepath)
+            if index % 10000 == 0:
+                print("Number: {0}".format(index))
+            index += 1
             #os.remove(filepath)
 
 def pro(filepath):
