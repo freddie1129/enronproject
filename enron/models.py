@@ -108,18 +108,13 @@ class RawEmail(models.Model):
 class RawEmailFrom(models.Model):
     e_id =  models.ForeignKey(RawEmail, on_delete=models.CASCADE)
     e_date = models.DateTimeField()
-    e_subject = models.CharField(blank=True, null=True, default=None,max_length=500)
-    e_mime = models.CharField(blank=True, null=True, default=None,max_length=200)
-    e_type = models.CharField(blank=True, null=True, default=None,max_length=200)
-    e_encoding = models.CharField(blank=True, null=True, default=None,max_length=200)
-    e_x_folder = models.CharField(blank=True, null=True, default=None,max_length=200)
-    e_x_origin = models.CharField(blank=True, null=True, default=None,max_length=200)
-    e_x_filename =  models.CharField(blank=True, null=True, default=None,max_length=200)
-    e_content =  models.TextField(blank=True, null=True, default=None,max_length=200)
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_subject = models.CharField(blank=True, null=True, default=None,max_length=1000)
+    e_content =  models.TextField(blank=True, null=True, default=None)
     e_path = models.CharField(blank=True, null=True, default=None,max_length=200)
 
     def __str__(self):
-        return self.e_id
+        return "{0} From {1}".format(self.e_id, self.e_from)
 
 
 
