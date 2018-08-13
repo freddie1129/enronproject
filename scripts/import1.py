@@ -90,6 +90,7 @@ def pro(filepath):
                          e_date = e_date,
                          e_from = e_from,
                          e_subject = e_subject,
+                         e_content = e_content,
                          e_path = e_path)
     try:
         email.save()
