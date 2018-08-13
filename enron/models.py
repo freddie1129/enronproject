@@ -106,7 +106,7 @@ class RawEmail(models.Model):
 
 
 class RawEmailFrom(models.Model):
-    e_id =  models.ForeignKey(RawEmail, on_delete=models.CASCADE)
+    e_id =  models.CharField(max_length=100,primary_key=True)
     e_date = models.DateTimeField()
     e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
     e_subject = models.CharField(blank=True, null=True, default=None,max_length=1000)
@@ -119,7 +119,7 @@ class RawEmailFrom(models.Model):
 
 
 class RawEmailTo(models.Model):
-    e_id =  models.ForeignKey(RawEmail, on_delete=models.CASCADE)
+    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
     e_date = models.DateTimeField()
     e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
     e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
@@ -128,7 +128,7 @@ class RawEmailTo(models.Model):
         return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
 
 class RawEmailCc(models.Model):
-    e_id =  models.ForeignKey(RawEmail, on_delete=models.CASCADE)
+    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
     e_date = models.DateTimeField()
     e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
     e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
@@ -138,8 +138,9 @@ class RawEmailCc(models.Model):
         return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
 
 
+
 class RawEmailBCc(models.Model):
-    e_id =  models.ForeignKey(RawEmail, on_delete=models.CASCADE)
+    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
     e_date = models.DateTimeField()
     e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
     e_to = models.CharField(max_length=128, blank=True, null=True, default=None)

@@ -20,7 +20,7 @@ def run():
                 logfile.write('\n')
                 continue
             pro(filepath)
-            os.remove(filepath)
+            #os.remove(filepath)
 
 def pro(filepath):
     file = open(filepath, encoding="ISO-8859-1")
