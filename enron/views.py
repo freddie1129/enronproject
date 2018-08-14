@@ -63,8 +63,8 @@ def summery(request):
               'staff_list':[staff.name for staff in staff_list]}
     return render(request, 'enron/summery.html', contex)
 
-def email_timeline(request, staff_a, staff_b):
-    contex = history(staff_a,staff_b)
+def email_timeline(request, staff_from, staff_to):
+    contex = history(staff_from,staff_to)
     return render(request,'enron/a_b_history.html',contex)
 
 
