@@ -25,6 +25,7 @@
 <table class="table table-bordered" style="width: 75%">
     <tr>
         <th>Number</th>
+        <th>Time</th>
         <th>Sender</th>
         <th>Receiver</th>
         <th>Email Id</th>
@@ -32,6 +33,7 @@
     {% for m in email_list %}
         <tr>
             <td>{{ forloop.counter }}</td>
+            <td>{{ m.e_date }}</td>
             <td>{{ m.e_from }}</td>
             <td>{{ m.e_to }}</td>
             <td><a href="{% url 'emailcontent' m.e_id %}"> {{ m.e_id }}</a></td>
