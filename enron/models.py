@@ -150,6 +150,17 @@ class RawEmailBCc(models.Model):
 
 
 
+class RawComm(models.Model):
+    staff_a = models.ForeignKey(StaffName, blank = True, null=True, related_name ='staff_a', default=None, on_delete=models.CASCADE)
+    staff_b = models.ForeignKey(StaffName, blank = True, null=True, related_name ='staff_b', default=None, on_delete=models.CASCADE)
+    number_a_b = models.IntegerField(default=0)
+    number_b_a = models.IntegerField(default=0)
+    record = models.TextField()
+
+    def __str__(self):
+        return self.record
+
+
 
 class ToEmail(models.Model):
     fromAddress = models.CharField(max_length=200)
