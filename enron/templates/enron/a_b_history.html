@@ -3,13 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
 </head>
 <body>
 <h1>{{ name_a }} &nbsp;&nbsp;and {{ name_b }} </h1>
 <p>{{ name_a }} sends {{ num_a_b }} emails to {{ name_b }}</p>
 <p>{{ name_b }} sends {{ num_b_a }} emails to {{ name_a }}</p>
-{% for m in email_list %}
-    <p>{{ forloop.counter }}: {{ m.e_from }} >>>>>>{{ m.e_to }}   <a href="{% url 'emailcontent' m.e_id %}"> {{ m.e_id }}</a> </p>
-{% endfor %}
+
+<table class="table table-bordered" style="width: 50%">
+    <tr>
+        <th>Number</th>
+        <th>Sender</th>
+        <th>Receiver</th>
+        <th>Email Id</th>
+    </tr>
+    {% for m in email_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ m.e_from }}</td>
+            <td>{{ m.e_to }}</td>
+            <td>{{ m.e_to }}</td>
+            <td><a href="{% url 'emailcontent' m.e_id %}"> {{ m.e_id }}</a></td>
+        </tr>
+    {% endfor %}
+</table>
 </body>
 </html>
