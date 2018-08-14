@@ -15,12 +15,17 @@
         table {
             margin: auto;
         }
+        .center {
+            margin: auto;
+	        text-align:center;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
-<h1>{{ name_a }} &nbsp;&nbsp;and {{ name_b }} </h1>
-<p>{{ name_a }} sends {{ num_a_b }} emails to {{ name_b }}</p>
-<p>{{ name_b }} sends {{ num_b_a }} emails to {{ name_a }}</p>
+<h1 class="center">Emails between {{ name_a }} and {{ name_b }}</h1>
+<p class="center">{{ name_a }} sends {{ num_a_b }} emails to {{ name_b }}</p>
+<p class="center">{{ name_b }} sends {{ num_b_a }} emails to {{ name_a }}</p>
 
 <table class="table table-bordered" style="width: 75%">
     <tr>
