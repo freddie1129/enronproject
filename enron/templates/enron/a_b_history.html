@@ -29,7 +29,6 @@
             <td>{{ forloop.counter }}</td>
             <td>{{ m.e_from }}</td>
             <td>{{ m.e_to }}</td>
-            <td>{{ m.e_to }}</td>
             <td><a href="{% url 'emailcontent' m.e_id %}"> {{ m.e_id }}</a></td>
         </tr>
     {% endfor %}
