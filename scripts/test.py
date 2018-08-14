@@ -67,7 +67,7 @@ def ini_com():
     staff_list = StaffName.objects.all()
     for staff_a in staff_list:
         for staff_b in staff_list:
-            context = history(staff_a.aliasName, staff_b.aliasName)
+            context = history(staff_a.name, staff_b.name)
             email_list = [m.e_id.e_id for m in context.get('email_list')]
             s =  RawComm(staff_a = staff_a,
                          staff_b = staff_b,
