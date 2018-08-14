@@ -48,7 +48,7 @@ def staff_detail(request,staff_name):
     pass
 
 def summery(request):
-    staff_list = StaffName.objects.all()[0:10]
+    staff_list = StaffName.objects.all()[0:100]
     brief = []
     for from_staff in staff_list:
         brief_row = [];
