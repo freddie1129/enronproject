@@ -46,9 +46,9 @@ def history(s_a, s_b):
     size_a = 0
     size_b = 0
     for index, m in enumerate(newMails):
-        if m.e_id in email_address_list_a:
+        if m.e_from in email_address_list_a:
             size_a += 1
-        elif m.e_id in email_address_list_b:
+        elif m.e_from in email_address_list_b:
             size_b += 1
         print("{0}:  {1}: {2} >>> {3}".format(index+1, m.e_date,m.e_from,m.e_to))
 
