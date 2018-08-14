@@ -9,7 +9,7 @@
 <p>{{ name_a }} send {{ num_a_b }} emails to {{ name_b }}</p>
 <p>{{ name_b }} send {{ num_b_a }} emails to {{ name_a }}</p>
 {% for m in email_list %}
-    <p>{{ forloop.counter }}: {{ m.e_form }} >>>>>>{{ m.e_to }}   <a href="{% url 'emailcontent' m.e_id %}"> {{ m.e_id }}</a> </p>
+    <p>{{ forloop.counter }}: {{ m.e_from }} >>>>>>{{ m.e_to }}   <a href="{% url 'emailcontent' m.e_id %}"> {{ m.e_id }}</a> </p>
 {% endfor %}
 </body>
 </html>

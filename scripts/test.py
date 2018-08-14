@@ -46,8 +46,8 @@ def history(s_a, s_b):
     for index, m in enumerate(newMails):
         print("{0}:  {1}: {2} >>> {3}".format(index+1, m.e_date,m.e_from,m.e_to))
 
-    contex = {'a_name':s_a,
-              'b_name':s_b,
+    contex = {'name_a':s_a,
+              'name_b':s_b,
               'num_a_b': len(mails_a_b),
               'num_b_a': len(mails_b_a),
               'email_list': newMails}
