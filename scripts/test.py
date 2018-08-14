@@ -43,12 +43,18 @@ def history(s_a, s_b):
 
 
     print('***********************************************************')
+    size_a = 0
+    size_b = 0
     for index, m in enumerate(newMails):
+        if m.e_id in email_address_list_a:
+            size_a += 1
+        elif m.e_id in email_address_list_b:
+            size_b += 1
         print("{0}:  {1}: {2} >>> {3}".format(index+1, m.e_date,m.e_from,m.e_to))
 
     contex = {'name_a':s_a,
               'name_b':s_b,
-              'num_a_b': len(mails_a_b),
-              'num_b_a': len(mails_b_a),
+              'num_a_b': size_a,
+              'num_b_a': size_b,
               'email_list': newMails}
     return contex
