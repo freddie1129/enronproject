@@ -24,7 +24,7 @@ def run():
             if index % 10000 == 0:
                 print("Number: {0}".format(index))
             index += 1
-            #os.remove(filepath)
+            os.remove(filepath)
 
 def pro(filepath):
     file = open(filepath, encoding="ISO-8859-1")

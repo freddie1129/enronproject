@@ -18,6 +18,8 @@ import os
 
 from enron.models import StaCommunication
 
+from scripts.test import history
+
 import json
 
 def index(request):
@@ -61,6 +63,12 @@ def summery(request):
               'staff_list':[staff.name for staff in staff_list]}
     return render(request, 'enron/summery.html', contex)
 
+def email_timeline(request, staff_a, staff_b):
+    contex = history(staff_a,staff_b)
+    return render(request,'enron/a_b_history.html',contex)
+
+
+
 def mail_history(request, staff_from, staff_to):
     detail_a_b = StaCommunication.objects.filter(staffName1=staff_from).filter(staffName2=staff_to)[0]
     detail_b_a = StaCommunication.objects.filter(staffName1=staff_to).filter(staffName2=staff_from)[0]
@@ -83,6 +91,37 @@ def mail_history(request, staff_from, staff_to):
         # a_b_list.append({"id":emaiId,"time": str(e.time)})
         a_b_list.append((False,emaiId, str(e.time)))
     a_b_list = sorted(a_b_list, key=lambda email: email[2])
+
+
+from enron.models import RawEmailFrom,RawEmailTo,RawEmailCc,RawEmailBCc
+def mail_history_1(request, staff_from, staff_to):
+    alias_a = Alias.objects.filter(staff=staff_from).filter(isTrust=True)
+    address_a = [staff.emailAddress for staff in alias_a]
+    alias_b = Alias.objects.filter(staff=staff_to).filter(isTrust=True)
+    address_b = [staff.emailAddress for staff in alias_b]
+    mail_a_b = RawEmailTo.objects.filter(x_from__in=address_a)
+
+
+    mailList_a_b = json.loads(detail_a_b.record)
+    mailList_b_a = json.loads(detail_b_a.record)
+
+    a_to_b = mailList_a_b['to']
+    b_to_a = mailList_b_a['to']
+
+    a_b_list = [];
+    for emaiId in a_to_b:
+        e = Email.objects.get(pk=emaiId)
+            # a_b_list.append({"id":emaiId,"time": str(e.time)})
+        a_b_list.append((True, emaiId, str(e.time)))
+
+        b_a_list = [];
+    for emaiId in b_to_a:
+        e = Email.objects.get(pk=emaiId)
+            # a_b_list.append({"id":emaiId,"time": str(e.time)})
+        a_b_list.append((False, emaiId, str(e.time)))
+    a_b_list = sorted(a_b_list, key=lambda email: email[2])
+
+
 
 
 
