@@ -7,6 +7,7 @@ from django.db.models import Count
 from enron.models import StaffName
 from enron.models import Alias
 from enron.models import Aliasf
+from enron.models import RawComm
 
 from enron.models import Email
 from enron.models import StaffEmail
@@ -62,6 +63,43 @@ def summery(request):
     contex = {'brief' : brief,
               'staff_list':[staff.name for staff in staff_list]}
     return render(request, 'enron/summery.html', contex)
+
+
+# def email_matrix(request):
+#     staff_list = StaffName.objects.all()[0:100]
+#     brief = []
+#     for from_staff in staff_list:
+#         brief_row = []
+#         for to_staff in staff_list:
+#             comm_between = RawComm.objects.filter(staff_a=from_staff).filter(staff_b=to_staff)[0]
+#             to_number = comm_between.toNumber
+#             cc_number = comm_between.ccNumber
+#             bcc_number = comm_between.bccNumber
+#             brief_row.append((from_staff.name,to_staff.name, to_number,cc_number,bcc_number))
+#         brief.append((from_staff.name,brief_row))
+#     contex = {'brief' : brief,
+#               'staff_list':[staff.name for staff in staff_list]}
+#    return render(request, 'enron/summery.html', contex)
+
+
+def email_matrix(request):
+    staff_list = StaffName.objects.all()[0:100]
+    brief = []
+    for from_staff in staff_list:
+        brief_row = []
+        for to_staff in staff_list:
+            comm_between = RawComm.objects.filter(staff_a=from_staff).filter(staff_b=to_staff)[0]
+            a_to_b = comm_between.number_a_b
+            b_to_a = comm_between.number_b_a
+            brief_row.append((from_staff.name,to_staff.name,a_to_b,b_to_a))
+        brief.append((from_staff.name,brief_row))
+    contex = {'brief' : brief,
+              'staff_list':[staff.name for staff in staff_list]}
+    return render(request, 'enron/summery.html', contex)
+
+
+
+
 
 def email_timeline(request, staff_from, staff_to):
     contex = history(staff_from,staff_to)
