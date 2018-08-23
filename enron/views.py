@@ -8,6 +8,7 @@ from enron.models import StaffName
 from enron.models import Alias
 from enron.models import Aliasf
 from enron.models import RawComm
+from enron.models import RawEmail
 
 from enron.models import Email
 from enron.models import StaffEmail
@@ -217,8 +218,8 @@ def staff_alias_a(request):
 
 def emailcontent(request, emailId):
     maildir = '/root/maildir/'
-    email = Email.objects.get(pk=emailId)
-    filepath =  maildir + email.path
+    email = RawEmail.objects.get(pk=emailId)
+    filepath =  maildir + email.e_path
     file = open(filepath, encoding="ISO-8859-1")
     text = file.read()
     file.close()
