@@ -29,7 +29,7 @@
         <tr>
             <td>{{ row_data.0 }}</td>
             {% for cell_data in row_data.1 %}
-                <td>->{{ cell_data.2 }}<br/><-{{ cell_data.3 }}<br/><a href="/enron/{{ cell_data.0 }}/{{ cell_data.1 }}/detail">details</a></td>
+                <td>Send: {{ cell_data.2 }}<br/>Receive: {{ cell_data.3 }}<br/><a href="/enron/{{ cell_data.0 }}/{{ cell_data.1 }}/detail">details</a></td>
             {% endfor %}
         </tr>
     {% endfor %}
