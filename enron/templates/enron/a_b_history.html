@@ -41,7 +41,7 @@
             <td>{{ m.e_date|date:'Y-m-d H:i:s' }}</td>
             <td>{{ m.e_from }}</td>
             <td>{{ m.e_to }}</td>
-            <td><a href="{% url 'emailcontent' m.e_id %}"> {{ m.e_id }}</a></td>
+            <td><a href="{% url 'emailcontent' m.e_id.e_id %}"> {{ m.e_id.e_id }}</a></td>
         </tr>
     {% endfor %}
 </table>
