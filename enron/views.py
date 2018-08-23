@@ -83,7 +83,7 @@ def summery(request):
 
 
 def email_matrix(request):
-    staff_list = StaffName.objects.all()[0:100]
+    staff_list = StaffName.objects.all()
     brief = []
     for from_staff in staff_list:
         brief_row = []
