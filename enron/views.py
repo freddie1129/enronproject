@@ -190,6 +190,14 @@ def mail_history_1(request, staff_from, staff_to):
 #     return render(request, 'enron/staff-alias.html', contex)
 
 
+def email_explore(request):
+    mailpath = "/root/maildir/"
+    for root, dirs, files in os.walk(mailpath):
+        for name in files:
+            filepath = os.path.join(root, name)
+
+    return render(request,'enron/email_explore.html')
+
 def staff_alias(request):
     staff_list = StaffName.objects.all()
     result = []
