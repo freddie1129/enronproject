@@ -2,15 +2,103 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+            integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+            integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+            crossorigin="anonymous"></script>
     <title>Title</title>
 </head>
 <body>
-<h3>Email File Path</h3>
-<p>{{ filepath }}</p>
-<h3>Email Raw Content</h3>
-<pre>{{ raw_content }}</pre>
-<br/>
-<h3>Stemmed Content</h3>
-<p>{{ stem_content }}</p>
+<div class="container">
+    <h3>Email Content</h3>
+    <table class="table table-bordered">
+        <tr>
+            <th scope="row">Email Id</th>
+            <td>{{ emailId }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Time</th>
+            <td>{{ timestamp }}</td>
+        </tr>
+        <tr>
+            <th scope="row">From</th>
+            <td><a href="https://www.w3schools.com">{{ sender }}</a></td>
+        </tr>
+        <tr>
+            <th scope="row">To Address</th>
+            <td>{% for a in receiverTo %}
+                <a href="https://www.w3schools.com">{{ a }}&nbsp;</a>
+            {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">To Name</th>
+            <td>{% for a in receiverToName %}
+                <b>{{ a }},&nbsp</b>
+            {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Cc Address</th>
+            <td>{% for a in receiverCc %}
+                <a href="https://www.w3schools.com">{{ a }}&nbsp;</a>
+            {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Cc Name</th>
+            <td>{% for a in receiverCcName %}
+                <a href="https://www.w3schools.com">{{ a }}&nbsp;</a>
+            {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Bcc Address</th>
+            <td>{% for a in receiverBcc %}
+                <a href="https://www.w3schools.com">{{ a }}&nbsp;</a>
+            {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Bcc Name</th>
+            <td>{% for a in receiverBccName %}
+                <a href="https://www.w3schools.com">{{ a }}&nbsp;</a>
+            {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Content</th>
+            <td>{{ content }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Stem Content</th>
+            <td><b>{{ stemContent }}</b></td>
+        </tr>
+    </table>
+
+    <p>
+        <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false"
+           aria-controls="collapseExample">
+            See Email Raw Text
+        </a>
+    </p>
+    <div class="collapse" id="collapseExample">
+        <div class="card card-body">
+            <pre>{{ rawEmail }}</pre>
+        </div>
+    </div>
+
+
+</div>
 </body>
 </html>

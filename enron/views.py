@@ -14,7 +14,8 @@ from enron.models import Email
 from enron.models import StaffEmail
 from django.db import connection
 
-
+from django.db.models import Max
+from django.db.models import Min
 
 import os
 
@@ -253,10 +254,29 @@ def processContent(request,id):
     text = file.read()
     file.close()
     stemWords = preprocess(email.e_content)
+    sender = email.e_from
+    receiverTo = [add.strip() for add in email.e_to.split(',')]
+    receiverToName = [add.strip() for add in email.e_x_to.split(',')]
+    receiverCc = [add.strip() for add in email.e_cc.split(',')]
+    receiverCcName = [add.strip() for add in email.e_x_cc.split(',')]
+    receiverBcc = [add.strip() for add in email.e_bcc.split(',')]
+    receiverBccName = [add.strip() for add in email.e_x_bcc.split(',')]
+    stemContent = " ".join(stemWords)
+
     context = {
-        "filepath" : email.e_path,
-        "raw_content": text,
-              "stem_content": " ".join(stemWords)}
+        "path" : email.e_path,
+        "emailId" : email.e_id,
+        "timestamp": email.e_date,
+        "sender" : sender,
+        "receiverTo" : receiverTo,
+        "receiverToName": receiverToName,
+        "receiverCc": receiverCc,
+        "receiverCcName": receiverCcName,
+        "receiverBcc": receiverBcc,
+        "receiverBccName": receiverBccName,
+        "content" : email.e_content,
+        "stemContent": stemContent,
+        "rawEmail" : text}
     return render(request,'enron/emailContent.html',context)
 
 
@@ -280,6 +300,52 @@ def staffsummery(request, staff_name):
               "staff_bcc_num" : bccNumber.get('bccNumber__sum'),
               "staff_bcc_list": list_bcc,}
     return render(request,'enron/staff_email_summery.html',contex)
+
+def summery(request, name):
+    staff = StaffName.objects.get(pk=name)
+    staffAlias =  Alias.objects.filter(staff = staff).filter(isTrust = True)
+    staffAliasOthers = Alias.objects.exclude(staff = staff).filter(isTrust = True)
+    emailAddress = [emailAddress for emailAddress in staffAlias]
+    emailAddressOthers = [emailAddress for emailAddress in staffAliasOthers]
+    toEmails =  RawEmailTo.objects.filter(e_from__in=emailAddress).filter(e_to__in=emailAddressOthers).order_by('e_date')
+    toNumber = toEmails.count()
+    toStartDate = toEmails[0].e_date # toFirstOne['e_date__min']
+    toEndDate = toEmails[toNumber - 1].e_date # toLastOne['e_date__max']
+    ccEmails = RawEmailCc.objects.filter(e_from__in=emailAddress).filter(e_to__in=emailAddressOthers).order_by('e_date')
+    ccNumber = ccEmails.count()
+    if ccNumber != 0:
+        ccStartDate = ccEmails[0].e_date
+        ccEndDate = ccEmails[ccNumber - 1].e_date
+    else:
+        ccStartDate = []
+        ccEndDate = []
+
+    bccEmails = RawEmailBCc.objects.filter(e_from__in=emailAddress).filter(e_to__in=emailAddressOthers).order_by('e_date')
+    bccNumber = bccEmails.count()
+    if bccNumber != 0:
+        bccStartDate = bccEmails[0].e_date
+        bccEndDate = bccEmails[bccNumber - 1].e_date
+    else:
+        bccStartDate = []
+        bccEndDate = []
+
+    contex = {
+                "name" : name,
+                "addresses" : emailAddress,
+                "toNumber": toNumber,
+                "toStartTime" : toStartDate,
+                "toEndTime" : toEndDate,
+                "ccNumber": ccNumber,
+                "ccStartTime": ccStartDate,
+                "ccEndTime": ccEndDate,
+                "bccNumber": bccNumber,
+                "bccStartTime": bccStartDate,
+                "bccEndTime": bccEndDate,
+    }
+    return render(request, 'enron/staffsummery.html', contex)
+
+
+    pass
 
 def dirlist(request):
     list = StaffName.objects.all();

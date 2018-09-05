@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+            integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+            integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+            crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="container">
+    <h2>{{ name }} Email Transaction Summery</h2>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="summery-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+               aria-selected="true">Summery</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="send-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile"
+               aria-selected="false">Send</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="cc-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact"
+               aria-selected="false">Cc</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="bcc-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact"
+               aria-selected="false">Bcc</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="summery-tab">
+                <br/>
+                <br/>
+                <ul >
+                    <li ><b>{{ name }}</b> sent <b>{{ toNumber }}</b> emails from
+                        <b>{{ toStartTime|date:'Y-m-d H:i' }}</b> to
+                        <b>{{ toEndTime|date:'Y-m-d H:i' }}</b>.
+                    </li>
+                    <li ><b>{{ name }}</b> cc <b>{{ ccNumber }}</b> emails from
+                        <b>{{ ccStartTime|date:'Y-m-d H:i' }}</b> to
+                        <b>{{ ccEndTime|date:'Y-m-d H:i' }}</b>.
+                    </li>
+                    <li ><b>{{ name }}</b> bcc <b>{{ bccNumber }}</b> emails from
+                        <b>{{ bccStartTime|date:'Y-m-d H:i' }}</b>
+                        to <b>{{ bccEndTime|date:'Y-m-d H:i' }}</b>.
+                    </li>
+                    <li >Possible email addresses used by <b>{{ name }}</b> are
+                        {% for a in addresses %}
+                            <a href="">{{ a }}</a>&nbsp;
+                        {% endfor %}
+                    </li>
+
+                </ul>
+
+        </div>
+        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="cc-tab">...</div>
+        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="bcc-tab">...</div>
+    </div>
+
+</div>
+</body>
+</html>
