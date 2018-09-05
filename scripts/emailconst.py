@@ -1,5 +1,7 @@
 
 class mailConstant:
+    cons_maildir = '/root/maildir/'
+
     result_received_email_number = "(Table:ToEmail, received Email) email number"
     result_received_email_number_from_enron_group = "received email number from staffs inside enron group"
     result_received_email_number_from_external = "received email number from person outside enron group"

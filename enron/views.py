@@ -14,13 +14,20 @@ from enron.models import Email
 from enron.models import StaffEmail
 from django.db import connection
 
+
+
 import os
+
 
 
 
 from enron.models import StaCommunication
 
 from scripts.test import history
+
+from scripts.emailconst import mailConstant
+from scripts.nlp_pre import preprocess
+
 
 import json
 
@@ -191,12 +198,14 @@ def mail_history_1(request, staff_from, staff_to):
 
 
 def email_explore(request):
-    mailpath = "/root/maildir/"
+    mailpath = "/home/freddie/dirtest/"
     for root, dirs, files in os.walk(mailpath):
         for name in files:
             filepath = os.path.join(root, name)
-
+            print("{1}: {2} : {3}".format(root,name,filepath))
     return render(request,'enron/email_explore.html')
+
+
 
 def staff_alias(request):
     staff_list = StaffName.objects.all()
@@ -234,6 +243,21 @@ def emailcontent(request, emailId):
     contex = {"content": text,
               "path": filepath}
     return render(request, 'enron/rawcontent.html', contex)
+
+
+def processContent(request,id):
+    maildir = mailConstant.cons_maildir
+    email = RawEmail.objects.get(pk=id)
+    filepath = maildir + email.e_path
+    file = open(filepath, encoding="ISO-8859-1")
+    text = file.read()
+    file.close()
+    stemWords = preprocess(email.e_content)
+    context = {
+        "filepath" : email.e_path,
+        "raw_content": text,
+              "stem_content": " ".join(stemWords)}
+    return render(request,'enron/emailContent.html',context)
 
 
 def alais_process_log(request):
