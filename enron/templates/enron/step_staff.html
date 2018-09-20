@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Enron</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        /* Remove the navbar's default margin-bottom and rounded borders */
+        .navbar {
+            margin-bottom: 0;
+            border-radius: 0;
+        }
+
+        /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+        .row.content {
+            height: 450px
+        }
+
+        /* Set gray background color and 100% height */
+        .sidenav {
+            padding-top: 20px;
+            background-color: #f1f1f1;
+            height: 100%;
+        }
+
+        /* Set black background color, white text and some padding */
+        footer {
+            background-color: #555;
+            color: white;
+            padding: 15px;
+        }
+
+        /* On small screens, set height to 'auto' for sidenav and grid */
+        @media screen and (max-width: 767px) {
+            .sidenav {
+                height: auto;
+                padding: 15px;
+            }
+
+            .row.content {
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">Enron Corpus</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li class="active"><a href="{% url 'home' %}">Home</a></li>
+            <li class="active"><a href="{% url 'home' %}">Staff</a></li>
+            <li><a href="#">About</a></li>
+        </ul>
+    </div>
+</nav>
+
+
+<div class="container-fluid text-center">
+    <div class="row content">
+        <div class="col-sm-3 sidenav">
+            <div class="list-group">
+                <a href="#" class="list-group-item">
+                    <h4 class="list-group-item-heading">Overview</h4>
+                    <p class="list-group-item-text">Project Introduction</p>
+                </a>
+                <a href="#" class="list-group-item">
+                    <h4 class="list-group-item-heading">Step 1</h4>
+                    <p class="list-group-item-text">Email Corpus Introduction</p>
+                </a>
+                <a href="#" class="list-group-item">
+                    <h4 class="list-group-item-heading">Step 2</h4>
+                    <p class="list-group-item-text">Set up Email Database</p>
+                </a>
+                <a href="#" class="list-group-item">
+                    <h4 class="list-group-item-heading">Step 3</h4>
+                    <p class="list-group-item-text">Email Corpus Overview</p>
+                </a>
+                <a href="#" class="list-group-item active">
+                    <h4 class="list-group-item-heading">Step 4</h4>
+                    <p class="list-group-item-text">Enron Staff Analysis</p>
+                </a>
+                <a href="#" class="list-group-item">
+                    <h4 class="list-group-item-heading">Step 5</h4>
+                    <p class="list-group-item-text">Email Content Analysis</p>
+                </a>
+                <a href="#" class="list-group-item">
+                    <h4 class="list-group-item-heading">Step 6</h4>
+                    <p class="list-group-item-text">Staff Stress Analysis</p>
+                </a>
+            </div>
+        </div>
+        <div class="col-sm-9 text-left">
+<h3>Core Staff List (Total: {{ staffList|length }})</h3>
+        <ul class="nav nav-pills">
+  <li class="active"><a data-toggle="pill" href="#home">Home</a></li>
+  <li><a data-toggle="pill" href="#menu1">Menu 1</a></li>
+  <li><a data-toggle="pill" href="#menu2">Menu 2</a></li>
+</ul>
+
+
+<div class="tab-content">
+
+  <div id="home" class="tab-pane fade in active">
+    <h3>HOME</h3>
+    <p>Some content.</p>
+  </div>
+  <div id="menu1" class="tab-pane fade">
+    <h3>Core Dataset</h3>
+    <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>StaffName</th>
+                    <th>Total</th>
+                    <th>SendNum</th>
+                    <th>ReNum(To)</th>
+                    <th>ReNum(Cc)</th>
+                    <th>ReNum(Bcc)</th>
+                    <th>Possible Address</th>
+                    <th>SendNum</th>
+                    <th>ReNum(To)</th>
+                    <th>ReNum(Cc)</th>
+                    <th>ReNum(Bcc)</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for staff in coreStaffList %}
+                    <tr>
+                        <td rowspan="{{ staff.addressList|length }}">{{ forloop.counter }}</td>
+                        <td rowspan="{{ staff.addressList|length }}"><a href="{% url 'summeryV2'  staff.name  %}" >{{ staff.name }}</a></td>
+                        <td rowspan="{{ staff.addressList|length }}">{{ staff.total }}</td>
+                        <td rowspan="{{ staff.addressList|length }}">{{ staff.senderNum }}</td>
+                        <td rowspan="{{ staff.addressList|length }}">{{ staff.receiveToNum }}</td>
+                        <td rowspan="{{ staff.addressList|length }}">{{ staff.receiveCcNum }}</td>
+                        <td rowspan="{{ staff.addressList|length }}">{{ staff.receiveBccNum }}</td>
+                        {% if staff.addressList|length > 0 %}
+                            <td>{{ staff.addressList.0.address }}</td>
+                            <td>{{ staff.addressList.0.sendNumber }}</td>
+                            <td>{{ staff.addressList.0.receiveToNumber }}</td>
+                            <td>{{ staff.addressList.0.receiveCcNumber }}</td>
+                            <td>{{ staff.addressList.0.receiveBccNumber }}</td>
+                        {% else %}
+                            <td>{{ staff.addressList|length }}</td>
+                            <td>n</td>
+                            <td>a</td>
+                            <td>d</td>
+                            <td>d</td>
+                        {% endif %}
+                    </tr>
+                    {% if staff.addressList|length > 0 %}
+
+                        {% for item in staff.addressList|slice:"1:" %}
+                            <tr>
+                                <td>{{ item.address }}</td>
+                                <td>{{ item.sendNumber }}</td>
+                                <td>{{ item.receiveToNumber }}</td>
+                                <td>{{ item.receiveCcNumber }}</td>
+                                <td>{{ item.receiveBccNumber }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+
+                </tbody>
+            </table>
+  </div>
+  <div id="menu2" class="tab-pane fade">
+    <h3>All Dataset</h3>
+     {% comment %}<table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>StaffName</th>
+                    <th>Total</th>
+                    <th>SendNum</th>
+                    <th>ReNum(To)</th>
+                    <th>ReNum(Cc)</th>
+                    <th>ReNum(Bcc)</th>
+                    <th>Address</th>
+                    <th>SendNum</th>
+                    <th>ReNum(To)</th>
+                    <th>ReNum(Cc)</th>
+                    <th>ReNum(Bcc)</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for staff in staffList %}
+                    <tr>
+                        <td rowspan="{{ staff.5|length }}">{{ forloop.counter }}</td>
+                        <td rowspan="{{ staff.5|length }}"><a href="{% url 'summeryV2'  staff.0  %}" >{{ staff.0 }}</a></td>
+                        <td rowspan="{{ staff.5|length }}">{{ staff.6 }}</td>
+                        <td rowspan="{{ staff.5|length }}">{{ staff.1 }}</td>
+                        <td rowspan="{{ staff.5|length }}">{{ staff.2 }}</td>
+                        <td rowspan="{{ staff.5|length }}">{{ staff.3 }}</td>
+                        <td rowspan="{{ staff.5|length }}">{{ staff.4 }}</td>
+                        {% if staff.5|length > 0 %}
+                            <td>{{ staff.5.0.address }}</td>
+                            <td>{{ staff.5.0.sendNumber }}</td>
+                            <td>{{ staff.5.0.receiveToNumber }}</td>
+                            <td>{{ staff.5.0.receiveCcNumber }}</td>
+                            <td>{{ staff.5.0.receiveBccNumber }}</td>
+                        {% else %}
+                            <td>{{ staff.5|length }}</td>
+                            <td>n</td>
+                            <td>a</td>
+                            <td>d</td>
+                            <td>d</td>
+                        {% endif %}
+                    </tr>
+                    {% if staff.5|length > 0 %}
+
+                        {% for item in staff.5|slice:"1:" %}
+                            <tr>
+                                <td>{{ item.address }}</td>
+                                <td>{{ item.sendNumber }}</td>
+                                <td>{{ item.receiveToNumber }}</td>
+                                <td>{{ item.receiveCcNumber }}</td>
+                                <td>{{ item.receiveBccNumber }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+
+                </tbody>
+            </table>{% endcomment %}
+      <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>StaffName</th>
+                    <th>Total</th>
+                    <th>SendNum</th>
+                    <th>ReNum(To)</th>
+                    <th>ReNum(Cc)</th>
+                    <th>ReNum(Bcc)</th>
+                    <th>Possible Address</th>
+                    <th>SendNum</th>
+                    <th>ReNum(To)</th>
+                    <th>ReNum(Cc)</th>
+                    <th>ReNum(Bcc)</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for staff in staffList %}
+                    <tr>
+                        <td rowspan="{{ staff.addressList|length }}">{{ forloop.counter }}</td>
+                        <td rowspan="{{ staff.addressList|length }}"><a href="{% url 'summeryV2'  staff.name  %}" >{{ staff.name }}</a></td>
+                        <td rowspan="{{ staff.addressList|length }}">{{ staff.total }}</td>
+                        <td rowspan="{{ staff.addressList|length }}">{{ staff.senderNum }}</td>
+                        <td rowspan="{{ staff.addressList|length }}">{{ staff.receiveToNum }}</td>
+                        <td rowspan="{{ staff.addressList|length }}">{{ staff.receiveCcNum }}</td>
+                        <td rowspan="{{ staff.addressList|length }}">{{ staff.receiveBccNum }}</td>
+                        {% if staff.addressList|length > 0 %}
+                            <td>{{ staff.addressList.0.address }}</td>
+                            <td>{{ staff.addressList.0.sendNumber }}</td>
+                            <td>{{ staff.addressList.0.receiveToNumber }}</td>
+                            <td>{{ staff.addressList.0.receiveCcNumber }}</td>
+                            <td>{{ staff.addressList.0.receiveBccNumber }}</td>
+                        {% else %}
+                            <td>{{ staff.addressList|length }}</td>
+                            <td>n</td>
+                            <td>a</td>
+                            <td>d</td>
+                            <td>d</td>
+                        {% endif %}
+                    </tr>
+                    {% if staff.addressList|length > 0 %}
+
+                        {% for item in staff.addressList|slice:"1:" %}
+                            <tr>
+                                <td>{{ item.address }}</td>
+                                <td>{{ item.sendNumber }}</td>
+                                <td>{{ item.receiveToNumber }}</td>
+                                <td>{{ item.receiveCcNumber }}</td>
+                                <td>{{ item.receiveBccNumber }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+
+                </tbody>
+            </table>
+  </div>
+</div>
+
+
+
+
+
+            {% for a in staffListCore %}
+                <p>{{ a.name }},{{ a.senderNum }},{{ a.receiveToNum }},{{ a.receiveCcNum }},{{ a.receiveBccNum }}</p>
+                {% for b in a.detail %}
+                    <p>{{ b.address }},{{ b.sendNumber }},{{ b.receiveToNumber }},{{ b.receiveCcNumber }},{{ b.receiveBccNumber }}</p>
+                    {% endfor %}
+            {% endfor %}
+
+
+
+
+        </div>
+    </div>
+</div>
+<footer class="container-fluid text-center">
+    <p>Footer Text</p>
+</footer>
+
+</body>
+</html>

@@ -3,13 +3,26 @@ from enron.models import StaffName, StaffEmail
 from enron.models import EmailWithAlias
 from enron.models import EmailWithStaff
 from enron.models import AnalysisResult
+from enron.models import Alias
+from enron.models import RawEmail,RawEmailFrom,RawEmailTo,RawEmailCc,RawEmailBCc
+from enron.models import RawEmailFromCore,RawEmailToCore,RawEmailCcCore,RawEmailBCcCore
+
+from enron.models import ResultAddress,ResultAddressCore
+
+from enron.models import RawCoreEmail
+
+from enron.models import Aliasf
+
 from enron.models import ToEmailNew,CcEmailNew,BccEmailNew
 from enron.models import StaCommunication
 from .emailconst import mailConstant
+from enron.models import RawCoreEmail
 import json
 from multiprocessing import Process
 from django.db import connection
+
 import os
+from subprocess import *
 from .Enronlib import EnronEmail
 mailpath = "/root/project/maildir/"
 
@@ -36,12 +49,135 @@ def run():
     # p4.start()
     # p4.join()
 
-    updateSender()
-    updateReceiverTo()
-    updateReceiverBcc()
-    updateReceiverCc()
+    #updateSender()
+    #updateReceiverTo()
+    #updateReceiverBcc()
+    #updateReceiverCc()
+    #initResultAddressTable1()
+    #initResultAddressTable()
+    #initRawEmailToTable()
+    #initResultAddressCoreTable()
+    splitTimeLine("allen-p")
+
+# select core staff's email and import them into RawEmailSamll
+def initCoreEmail():
+    staffList = Alias.objects.filter(isTrust=True)
+    staffNameList = [staff.emailAddress for staff in  staffList]
+    emails = RawEmail.objects.filter(e_from__in = staffNameList)
+    pass
+
+def elibGetInvalidAddresses():
+    staffList = Alias.objects.filter(isTrust=True)
+    return [staff.emailAddress for staff in staffList]
+
+def initRawEmailToTable():
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM enron_rawemailfromcore")
+        cursor.execute("DELETE FROM enron_rawemailtocore")
+        cursor.execute("DELETE FROM enron_rawemailcccore")
+        cursor.execute("DELETE FROM enron_rawemailbcccore")
+        cursor.execute("INSERT INTO enron_rawemailfromcore select * FROM enron_rawemailfrom WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1)")
+        cursor.execute("INSERT INTO enron_rawemailtocore select * FROM enron_rawemailto WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1) AND e_to IN(SELECT emailAddress FROM enron_alias where isTrust=1)")
+        cursor.execute("INSERT INTO enron_rawemailcccore select * FROM enron_rawemailcc WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1) AND e_to IN(SELECT emailAddress FROM enron_alias where isTrust=1)")
+        cursor.execute("INSERT INTO enron_rawemailbcccore select * FROM enron_rawemailbcc WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1) AND e_to IN(SELECT emailAddress FROM enron_alias where isTrust=1)")
+    pass
 
 
+#initialize ResultAddress Table
+def initResultAddressTable():
+    staffList = Alias.objects.filter(isTrust=True)
+    staffNameList = [staff.emailAddress for staff in staffList]
+    addressList = ResultAddress.objects.filter(address__in=staffNameList)
+    i = 0
+    print("Total: {0}".format(addressList.count()))
+    for addressEntity in addressList:
+        address = addressEntity.address
+        addressEntity.sendNumber = RawEmailFrom.objects.filter(e_from=address).count()
+        addressEntity.receiveToNumber = RawEmailTo.objects.filter(e_to=address).count()
+        addressEntity.receiveCcNumber = RawEmailCc.objects.filter(e_to=address).count()
+        addressEntity.receiveBccNumber = RawEmailBCc.objects.filter(e_to=address).count()
+        addressEntity.save()
+        i = i + 1
+        print("{0}:{1},{2},{3},{4}".format(i,addressEntity.sendNumber,addressEntity.receiveToNumber,
+                                           addressEntity.receiveCcNumber,addressEntity.receiveBccNumber))
+
+
+
+#initialize ResultAddress Table
+def initResultAddressCoreTable():
+    staffList = Alias.objects.filter(isTrust=True)
+    staffNameList = [staff.emailAddress for staff in staffList]
+    for e in staffNameList:
+        a = ResultAddressCore(address=e)
+        a.save()
+
+    staffList = Alias.objects.filter(isTrust=True)
+    staffNameList = [staff.emailAddress for staff in staffList]
+    addressList = ResultAddressCore.objects.filter(address__in=staffNameList)
+    i = 0
+    print("Total: {0}".format(addressList.count()))
+    for addressEntity in addressList:
+        address = addressEntity.address
+        addressEntity.sendNumber = RawEmailFromCore.objects.filter(e_from=address).count()
+        addressEntity.receiveToNumber = RawEmailToCore.objects.filter(e_to=address).count()
+        addressEntity.receiveCcNumber = RawEmailCcCore.objects.filter(e_to=address).count()
+        addressEntity.receiveBccNumber = RawEmailBCcCore.objects.filter(e_to=address).count()
+        addressEntity.save()
+        i = i + 1
+        print("{0}:{1},{2},{3},{4}".format(i,addressEntity.sendNumber,addressEntity.receiveToNumber,
+                                           addressEntity.receiveCcNumber,addressEntity.receiveBccNumber))
+
+
+# get all emails sended by a given staff's
+# remove emails which has same timestamp
+# divide the emails into two parts, the first 3/4 as training subset and the latter 1/4 testing set
+import csv
+import datetime
+def splitTimeLine(name):
+    staff = StaffName.objects.get(pk = name)
+    alias = Alias.objects.filter(staff=staff).filter(isTrust=True)
+    addressList = [a.emailAddress for a in alias]
+    starttime = datetime.datetime(year =1990, month=1, day=1)
+    mails = RawEmailFromCore.objects.filter(e_from__in=addressList).filter(e_date__gt=starttime)
+
+    #delete emails with the same timestamp
+    value = set(map(lambda x: x.e_date, mails))
+    newList = [[e for e in mails if e.e_date == x] for x in value]
+    newMails = [e[0] for e in newList]
+
+    newMails = sorted(newMails, key=lambda mail: mail.e_date)
+
+    size = len(newMails)
+    #first three quater 3/4
+    firstPartIndex = int(size * 0.75)
+    print("Total: {0}".format(size))
+    print("First Part: {0}---{1}".format(0, firstPartIndex))
+    print("Last Part: {0}----{1}".format(firstPartIndex + 1, size-1))
+    #for e in newMails[0 : firstPartIndex]:
+    #    print("{0},{1}".format(e.e_id, e.e_date))
+    #print("=========================================")
+    #for e in newMails[firstPartIndex + 1 :]:
+    #    print("{0},{1},{2}".format(e.e_id, e.e_date, e.e_from))
+
+    import os
+    cwd = os.getcwd()
+    print("Current path: {0}".format(cwd))
+    with open("./enron/static/enron/a.csv",'w', newline='') as f:
+        write = csv.writer(f)
+        write.writerows([["dtg","value"]])
+        write.writerows([[e.e_date,1] for e in newMails])
+
+    return (newMails[0 : firstPartIndex], newMails[firstPartIndex + 1 : ])
+
+
+
+
+def initResultAddressTable1():
+    staffList = Alias.objects.filter(isTrust=True)
+    staffNameList = [staff.emailAddress for staff in staffList]
+    for e in staffNameList:
+        a = ResultAddress(address=e)
+        a.save()
 
 def getFileNumber():
     number = 0
@@ -394,5 +530,21 @@ def analysis_cc_mail():
 
 def analysis_bcc_mail():
     pass
+
+
+
+
+def stressAnalysis(text):
+    process = Popen(['java', '-jar', './TensiStrengthMain.jar', 'sentidata', './TensiStrength_Data/', 'explain', "text",
+                     text, "urlencoded", "mood", "0"], stdout=PIPE, stderr=PIPE)
+    line = process.stdout.readline().decode("utf-8")
+    print("==================")
+    print(line)
+
+    ret = line.split("+")
+    relax_level = ret[0]
+    stress_level = ret[1]
+
+    return (relax_level,stress_level)
 
 

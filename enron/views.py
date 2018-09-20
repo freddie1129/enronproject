@@ -9,13 +9,20 @@ from enron.models import Alias
 from enron.models import Aliasf
 from enron.models import RawComm
 from enron.models import RawEmail
+from enron.models import ResultAddress
+from enron.models import ResultAddressCore
+
+
 
 from enron.models import Email
 from enron.models import StaffEmail
+from enron.models import StaStaffEmailData
 from django.db import connection
 
 from django.db.models import Max
 from django.db.models import Min
+from django.db.models import Sum
+
 
 import os
 
@@ -28,6 +35,9 @@ from scripts.test import history
 
 from scripts.emailconst import mailConstant
 from scripts.nlp_pre import preprocess
+from scripts.maillib import splitTimeLine
+from scripts.maillib import elibGetInvalidAddresses
+
 
 
 import json
@@ -45,7 +55,9 @@ def index(request):
     return render(request, 'enron/index.html', context)
 
 def home(request):
-    return render(request, 'enron/index.html')
+    staff_list = StaffName.objects.all()
+    context = {'staffList': staff_list}
+    return render(request, 'enron/index.html',context)
 
 
 
@@ -245,8 +257,12 @@ def emailcontent(request, emailId):
               "path": filepath}
     return render(request, 'enron/rawcontent.html', contex)
 
+import urllib.request
+import httplib2
+from urllib.parse import quote
 
-def processContent(request,id):
+
+def emailContentV2(request,id):
     maildir = mailConstant.cons_maildir
     email = RawEmail.objects.get(pk=id)
     filepath = maildir + email.e_path
@@ -255,19 +271,30 @@ def processContent(request,id):
     file.close()
     stemWords = preprocess(email.e_content)
     sender = email.e_from
+    senderName = email.e_x_from.split("<")[0].strip()
     receiverTo = [add.strip() for add in email.e_to.split(',')]
-    receiverToName = [add.strip() for add in email.e_x_to.split(',')]
+    receiverToName = [add.split("<",1)[0].strip() for add in email.e_x_to.split(',')]
     receiverCc = [add.strip() for add in email.e_cc.split(',')]
-    receiverCcName = [add.strip() for add in email.e_x_cc.split(',')]
+    receiverCcName = [add.split("<",1)[0].strip() for add in email.e_x_cc.split(',')]
     receiverBcc = [add.strip() for add in email.e_bcc.split(',')]
-    receiverBccName = [add.strip() for add in email.e_x_bcc.split(',')]
+    receiverBccName = [add.split("<",1)[0].strip() for add in email.e_x_bcc.split(',')]
     stemContent = " ".join(stemWords)
+
+    text = stemContent
+    qtest = quote(text)
+    GETrequest = "http://sentistrength.wlv.ac.uk/tensistrength.php?text={0}&submit=Detect+Stress+and+Relaxation&result=dual".format(qtest)
+
+    resp, content = httplib2.Http().request(GETrequest)
+    html = content.decode("utf-8")
+    val1 = html.split('has relaxation strength <b>')[1].split('</b>')[0]
+    val2 = html.split('has relaxation strength <b>')[1].split('</b>')[1].split('<b>')[1].split('</b>')[0]
 
     context = {
         "path" : email.e_path,
         "emailId" : email.e_id,
         "timestamp": email.e_date,
         "sender" : sender,
+        "senderName" : senderName,
         "receiverTo" : receiverTo,
         "receiverToName": receiverToName,
         "receiverCc": receiverCc,
@@ -276,12 +303,69 @@ def processContent(request,id):
         "receiverBccName": receiverBccName,
         "content" : email.e_content,
         "stemContent": stemContent,
-        "rawEmail" : text}
-    return render(request,'enron/emailContent.html',context)
+        "rawEmail" : text,
+        "var1" : int(val1),
+        "var2" : int(val2)
+        }
+    return render(request,'enron/emailContentV2.html',context)
 
 
 def alais_process_log(request):
     return render(request, 'enron/staff-alias-process-log.html')
+
+def step_staff(request):
+    staffList = StaffName.objects.all()
+    staff_context = []
+    staff_context_core = []
+    for staff in staffList:
+        a = Alias.objects.filter(staff=staff)
+        e_list = [e.emailAddress for e in a]
+        b = ResultAddress.objects.filter(address__in=e_list)
+        addList = b.all()
+        sendNumber = b.aggregate(Sum('sendNumber'))
+        sendNumber = sendNumber['sendNumber__sum']
+        receiverToNumber = b.aggregate(Sum('receiveToNumber'))
+        receiverToNumber = receiverToNumber['receiveToNumber__sum']
+        receiverCcNumber = b.aggregate(Sum('receiveCcNumber'))
+        receiverCcNumber = receiverCcNumber['receiveCcNumber__sum']
+        receiverBccNumber = b.aggregate(Sum('receiveBccNumber'))
+        receiverBccNumber = receiverBccNumber['receiveBccNumber__sum']
+        total = sendNumber + receiverToNumber + receiverCcNumber + receiverBccNumber
+        #staff_context.append((staff.name,sendNumber,receiverToNumber,receiverCcNumber,receiverBccNumber,addList,total))
+        staff_context.append(StaStaffEmailData(staff.name,sendNumber,receiverToNumber,receiverCcNumber,receiverBccNumber,addList))
+
+        b = ResultAddressCore.objects.filter(address__in=e_list)
+        addList = b.all()
+        sendNumber = b.aggregate(Sum('sendNumber'))
+        sendNumber = sendNumber['sendNumber__sum']
+        receiverToNumber = b.aggregate(Sum('receiveToNumber'))
+        receiverToNumber = receiverToNumber['receiveToNumber__sum']
+        receiverCcNumber = b.aggregate(Sum('receiveCcNumber'))
+        receiverCcNumber = receiverCcNumber['receiveCcNumber__sum']
+        receiverBccNumber = b.aggregate(Sum('receiveBccNumber'))
+        receiverBccNumber = receiverBccNumber['receiveBccNumber__sum']
+        total = sendNumber + receiverToNumber + receiverCcNumber + receiverBccNumber
+        # staff_context.append((staff.name,sendNumber,receiverToNumber,receiverCcNumber,receiverBccNumber,addList,total))
+        staff_context_core.append(
+            StaStaffEmailData(staff.name, sendNumber, receiverToNumber, receiverCcNumber, receiverBccNumber, addList))
+
+
+
+        #staff_context_core.append(StaStaffEmailData(staff.name,sendNumber,receiverToNumber,receiverCcNumber,receiverBccNumber,addList))
+
+    #staff_context.sort(key=lambda x : x[6], reverse=True)
+    #staff_context.sort(key=lambda x : x.total, reverse=True)
+    #staff_context_core.sort(key=lambda x : x.total, reverse=True)
+
+
+    #context = {"staffList": staff_context,
+    #           "staffListCore" : staff_context_core}
+
+    context = {"staffList": staff_context,
+               "coreStaffList": staff_context_core}
+
+
+    return render(request, 'enron/step_staff.html',context)
 
 
 def staffsummery(request, staff_name):
@@ -300,6 +384,53 @@ def staffsummery(request, staff_name):
               "staff_bcc_num" : bccNumber.get('bccNumber__sum'),
               "staff_bcc_list": list_bcc,}
     return render(request,'enron/staff_email_summery.html',contex)
+
+
+def summeryV2(request, name):
+    splitTimeLine(name)
+    staff = StaffName.objects.get(pk = name)
+    staffAlias = Alias.objects.filter(staff=staff).filter(isTrust=True)
+    staffEmailAddress = [emailAddress for emailAddress in staffAlias]
+    toEmails = RawComm.objects.filter(staff_a = staff).exclude(staff_b = staff)
+
+    toNumberQuery = toEmails.aggregate(Sum("number_a_b"))
+    toNumber = toNumberQuery['number_a_b__sum']
+
+    receiveNumberQuery = toEmails.aggregate(Sum("number_b_a"))
+    receiveNumber = receiveNumberQuery['number_b_a__sum']
+
+    otherStaffList = StaffName.objects.exclude(name = name)
+    toMailsFromThisStaff = []
+    for s in otherStaffList:
+        item = toEmails.filter(staff_b = s)[0]
+        if item.number_a_b !=0 and item.number_b_a != 0:
+            data = json.loads(item.record)
+            toMailsFromThisStaff.append((item,data))
+    toMailsFromThisStaff.sort(key = lambda  x : x[0].number_a_b + x[0].number_b_a, reverse=True)
+
+    contex = {
+        "name": name,
+        "addresses": staffEmailAddress,
+        "toNumber": toNumber,
+        "receiveNumber": receiveNumber,
+        "recordList" : toMailsFromThisStaff
+    }
+    return render(request, 'enron/staffsummeryV2.html', contex)
+
+
+
+
+
+
+    pass
+
+
+def staffListV2(request):
+    staffList = StaffName.objects.all()
+    context = {
+        "staff" : staffList
+    }
+    pass
 
 def summery(request, name):
     staff = StaffName.objects.get(pk=name)
@@ -348,10 +479,14 @@ def summery(request, name):
     pass
 
 def dirlist(request):
-    list = StaffName.objects.all();
+    list = StaffName.objects.all()
     contex ={ "staff_name_list" :  [staff.name for staff in list]}
 
     return render(request,'enron/dirlist.html',contex)
+
+
+def test(request):
+    return render(request, 'enron/test.html')
 
 
 def my_custom_sql(name):

@@ -48,7 +48,7 @@
     {% for staff in staff_list %}
         <tr>
             <td rowspan="{{ staff.1 | length }}">{{ forloop.counter }}</td>
-            <td rowspan="{{ staff.1 | length }}"><a href="{% url 'staffsummery' staff.0 %}" >{{ staff.0 }}</a></td>
+            <td rowspan="{{ staff.1 | length }}"><a href="{% url 'summeryV2' staff.0 %}" >{{ staff.0 }}</a></td>
             <td>{{ staff.1.0.0 }}</td>
             {% if staff.1.0.1 %}
                     <td>trusted</td>

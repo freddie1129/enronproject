@@ -104,6 +104,101 @@ class RawEmail(models.Model):
     def __str__(self):
         return self.e_id
 
+class RawCoreEmail(models.Model):
+    e_id = models.CharField(max_length=100,primary_key=True)
+    e_date = models.TextField(blank=True, null=True, default=None)
+    e_from = models.TextField(blank=True, null=True, default=None)
+    e_to = models.TextField(blank=True, null=True, default=None)
+    e_subject = models.TextField(blank=True, null=True, default=None)
+    e_cc = models.TextField(blank=True, null=True, default=None)
+    e_mime = models.TextField(blank=True, null=True, default=None)
+    e_type = models.TextField(blank=True, null=True, default=None)
+    e_encoding = models.TextField(blank=True, null=True, default=None)
+    e_bcc = models.TextField(blank=True, null=True, default=None)
+    e_x_from = models.TextField(blank=True, null=True, default=None)
+    e_x_to = models.TextField(blank=True, null=True, default=None)
+    e_x_cc = models.TextField(blank=True, null=True, default=None)
+    e_x_bcc = models.TextField(blank=True, null=True, default=None)
+    e_x_folder = models.TextField(blank=True, null=True, default=None)
+    e_x_origin = models.TextField(blank=True, null=True, default=None)
+    e_x_filename =  models.TextField(blank=True, null=True, default=None)
+    e_content =  models.TextField(blank=True, null=True, default=None)
+    e_path = models.CharField(max_length=128,blank=True, null=True, default=None)
+
+    def __str__(self):
+        return self.e_id
+
+
+
+
+class RawEmailSmall(models.Model):
+    e_id = models.CharField(max_length=100,primary_key=True)
+    e_date = models.TextField(blank=True, null=True, default=None)
+    e_from = models.TextField(blank=True, null=True, default=None)
+    e_to = models.TextField(blank=True, null=True, default=None)
+    e_subject = models.TextField(blank=True, null=True, default=None)
+    e_cc = models.TextField(blank=True, null=True, default=None)
+    e_mime = models.TextField(blank=True, null=True, default=None)
+    e_type = models.TextField(blank=True, null=True, default=None)
+    e_encoding = models.TextField(blank=True, null=True, default=None)
+    e_bcc = models.TextField(blank=True, null=True, default=None)
+    e_x_from = models.TextField(blank=True, null=True, default=None)
+    e_x_to = models.TextField(blank=True, null=True, default=None)
+    e_x_cc = models.TextField(blank=True, null=True, default=None)
+    e_x_bcc = models.TextField(blank=True, null=True, default=None)
+    e_x_folder = models.TextField(blank=True, null=True, default=None)
+    e_x_origin = models.TextField(blank=True, null=True, default=None)
+    e_x_filename =  models.TextField(blank=True, null=True, default=None)
+    e_content =  models.TextField(blank=True, null=True, default=None)
+    e_path = models.CharField(max_length=128,blank=True, null=True, default=None)
+
+    def __str__(self):
+        return self.e_id
+
+class RawEmailBackup(models.Model):
+    e_id = models.CharField(max_length=100,primary_key=True)
+    e_date = models.TextField(blank=True, null=True, default=None)
+    e_from = models.TextField(blank=True, null=True, default=None)
+    e_to = models.TextField(blank=True, null=True, default=None)
+    e_subject = models.TextField(blank=True, null=True, default=None)
+    e_cc = models.TextField(blank=True, null=True, default=None)
+    e_mime = models.TextField(blank=True, null=True, default=None)
+    e_type = models.TextField(blank=True, null=True, default=None)
+    e_encoding = models.TextField(blank=True, null=True, default=None)
+    e_bcc = models.TextField(blank=True, null=True, default=None)
+    e_x_from = models.TextField(blank=True, null=True, default=None)
+    e_x_to = models.TextField(blank=True, null=True, default=None)
+    e_x_cc = models.TextField(blank=True, null=True, default=None)
+    e_x_bcc = models.TextField(blank=True, null=True, default=None)
+    e_x_folder = models.TextField(blank=True, null=True, default=None)
+    e_x_origin = models.TextField(blank=True, null=True, default=None)
+    e_x_filename =  models.TextField(blank=True, null=True, default=None)
+    e_content =  models.TextField(blank=True, null=True, default=None)
+    e_path = models.CharField(max_length=128,blank=True, null=True, default=None)
+
+    def __str__(self):
+        return self.e_id
+
+
+class ResultAddress(models.Model):
+    address = models.CharField(max_length=128, primary_key=True)
+    sendNumber = models.IntegerField(default=0)
+    receiveToNumber = models.IntegerField(default=0)
+    receiveCcNumber = models.IntegerField(default=0)
+    receiveBccNumber = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.address
+
+class ResultAddressCore(models.Model):
+    address = models.CharField(max_length=128, primary_key=True)
+    sendNumber = models.IntegerField(default=0)
+    receiveToNumber = models.IntegerField(default=0)
+    receiveCcNumber = models.IntegerField(default=0)
+    receiveBccNumber = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.address
 
 class RawEmailFrom(models.Model):
     e_id =  models.CharField(max_length=100,primary_key=True)
@@ -149,6 +244,51 @@ class RawEmailBCc(models.Model):
         return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
 
 
+class RawEmailFromCore(models.Model):
+    e_id =  models.CharField(max_length=100,primary_key=True)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_subject = models.CharField(blank=True, null=True, default=None,max_length=1000)
+    e_content =  models.TextField(blank=True, null=True, default=None)
+    e_path = models.CharField(blank=True, null=True, default=None,max_length=200)
+    relax_level = models.IntegerField(blank=True, null=True)
+    stress_level = models.IntegerField(blank=True, null=True)
+
+
+    def __str__(self):
+        return "{0} From {1}".format(self.e_id, self.e_from)
+
+
+
+class RawEmailToCore(models.Model):
+    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+
+    def __str__(self):
+        return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
+
+class RawEmailCcCore(models.Model):
+    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+
+
+    def __str__(self):
+        return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
+
+
+
+class RawEmailBCcCore(models.Model):
+    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+
+    def __str__(self):
+        return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
 
 class RawComm(models.Model):
     staff_a = models.ForeignKey(StaffName, blank = True, null=True, related_name ='staff_a', default=None, on_delete=models.CASCADE)
@@ -355,3 +495,13 @@ class StaCommunication(models.Model):
 
     def __str__(self):
         return self.record
+
+class StaStaffEmailData():
+    def __init__(self,name,senderNum,receiveToNum,receiveCcNum,receiveBccNum,detail):
+        self.name = name
+        self.senderNum = senderNum
+        self.receiveToNum = receiveToNum
+        self.receiveCcNum = receiveCcNum
+        self.receiveBccNum = receiveBccNum
+        self.total = senderNum + receiveToNum + receiveCcNum + receiveBccNum
+        self.addressList = detail

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Enron</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">Enron Corpus</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="{% url 'home' %}">Home</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+  </div>
+</nav>
+
+
+<div class="container">
+    <h3>Email Content</h3>
+    <table class="table table-bordered">
+        <tr>
+            <th scope="row">Filepath</th>
+            <td>{{ path }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Email Id</th>
+            <td>{{ emailId }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Time</th>
+            <td>{{ timestamp }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Send Address</th>
+            <td><a href="https://www.w3schools.com">{{ sender }}</a></td>
+        </tr>
+        <tr>
+            <th scope="row">Sender Name</th>
+            <td><a href="https://www.w3schools.com">{{ senderName }}</a></td>
+        </tr>
+        <tr>
+            <th scope="row">To Address</th>
+            <td>{% for a in receiverTo %}
+                <a href="https://www.w3schools.com">{{ a }}&nbsp;</a>
+            {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">To Name</th>
+            <td>{% for a in receiverToName %}
+                <b>{{ a }},&nbsp</b>
+            {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Cc Address</th>
+            <td>{% for a in receiverCc %}
+                <a href="https://www.w3schools.com">{{ a }}&nbsp;</a>
+            {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Cc Name</th>
+            <td>{% for a in receiverCcName %}
+                <a href="https://www.w3schools.com">{{ a }}&nbsp;</a>
+            {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Bcc Address</th>
+            <td>{% for a in receiverBcc %}
+                <a href="https://www.w3schools.com">{{ a }}&nbsp;</a>
+            {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Bcc Name</th>
+            <td>{% for a in receiverBccName %}
+                <a href="https://www.w3schools.com">{{ a }}&nbsp;</a>
+            {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Content</th>
+            <td><pre>{{ content }}</pre></td>
+        </tr>
+        <tr>
+            <th scope="row">Stem Content</th>
+            <td><b>{{ stemContent }}</b></td>
+        </tr>
+        <tr>
+            <th scope="row">TensiStrength</th>
+            <td>Relaxation strength <b>{{ var1 }}</b> and stress strenght <b>{{ var2 }}</b></td>
+        </tr>
+    </table>
+
+    <p>
+        <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false"
+           aria-controls="collapseExample">
+            See Email Raw Text
+        </a>
+    </p>
+    <div class="collapse" id="collapseExample">
+        <div class="card card-body">
+            <pre>{{ rawEmail }}</pre>
+        </div>
+    </div>
+
+
+</div>
+</body>
+</html>

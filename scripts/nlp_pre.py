@@ -2,8 +2,9 @@ from nltk.corpus import brown
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
+import string
 
-stopWords = set(stopwords.words('english'))
+stopWords = set ([w.upper() for w in stopwords.words('english') ])
 ps = PorterStemmer()
 
 def run():
@@ -14,12 +15,17 @@ def clean(content):
     pass
 
 def preprocess(content):
-    words = word_tokenize(content)
+    context =  content.split("---------------------- Forwarded",1)[0]
+    context = context.upper()
+
+    words = word_tokenize(context)
     wordsStopped = []
 
+    all_stops = stopWords | set(string.punctuation)
     for w in words:
-        if w not in stopWords:
+        if w not in all_stops:
             wordsStopped.append(w)
 
     wordsStemed = [ps.stem(word) for word in wordsStopped]
     return wordsStemed
+

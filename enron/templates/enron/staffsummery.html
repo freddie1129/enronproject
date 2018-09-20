@@ -21,6 +21,27 @@
 <body>
 <div class="container">
     <h2>{{ name }} Email Transaction Summery</h2>
+<ul >
+                    <li ><b>{{ name }}</b> sent <b>{{ toNumber }}</b> emails from
+                        <b>{{ toStartTime|date:'Y-m-d H:i' }}</b> to
+                        <b>{{ toEndTime|date:'Y-m-d H:i' }}</b>.
+                    </li>
+                    <li ><b>{{ name }}</b> cc <b>{{ ccNumber }}</b> emails from
+                        <b>{{ ccStartTime|date:'Y-m-d H:i' }}</b> to
+                        <b>{{ ccEndTime|date:'Y-m-d H:i' }}</b>.
+                    </li>
+                    <li ><b>{{ name }}</b> bcc <b>{{ bccNumber }}</b> emails from
+                        <b>{{ bccStartTime|date:'Y-m-d H:i' }}</b>
+                        to <b>{{ bccEndTime|date:'Y-m-d H:i' }}</b>.
+                    </li>
+                    <li >Possible email addresses used by <b>{{ name }}</b> are
+                        {% for a in addresses %}
+                            <a href="">{{ a }}</a>&nbsp;
+                        {% endfor %}
+                    </li>
+
+                </ul>
+
     <ul class="nav nav-tabs" id="myTab" role="tablist">
         <li class="nav-item">
             <a class="nav-link active" id="summery-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"

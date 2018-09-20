@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>Enron</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- load the d3.js library -->
+    <script src="//d3js.org/d3.v4.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">Enron Corpus</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="{% url 'home' %}">Home</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+  </div>
+</nav>
+
+{% load static %}
+<div class="container">
+    <h2>{{ name }} Email Transaction Summery</h2>
+
+    <div id="figure"></div>
+
+
+    <ul class="list-group">
+        <li class="list-group-item"><b>{{ name }}</b> sent <b>{{ toNumber }}</b> emails,received <b>{{ receiveNumber }}</b> emails.
+        </li >
+        <li class="list-group-item"><b>{{ name }}</b> contacts <b>{{ recordList|length }}</b> Enron core staffs in this email corpus.</li>
+        <li class="list-group-item">Possible email addresses used by <b>{{ name }}</b> are
+            {% for a in addresses %}
+                <a href="">{{ a }}</a>&nbsp;
+            {% endfor %}
+        </li>
+    </ul>
+
+<br/>
+
+
+    <table class="table table-bordered">
+        <tr>
+            <th>Index</th>
+            <th>Name</th>
+            <th>Total Number</th>
+            <th>Send Number</th>
+            <th>Receive Number</th>
+            <th>Details</th>
+        </tr>
+        {% for item in recordList %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><a href="{% url 'summeryV2' item.0.staff_b %}" >{{ item.0.staff_b }}</a>
+                    </td>
+                <td>{{item.0.number_a_b|add:item.0.number_b_a}}</td>
+
+                <td>{{ item.0.number_a_b }}</td>
+                <td>{{ item.0.number_b_a }}</td>
+                <td>
+                    <button data-toggle="collapse" data-target="#detail{{ forloop.counter0 }}">see all</button>
+                    <div id="detail{{ forloop.counter0 }}" class="collapse">
+                        <ol>
+                            {% for emailId in item.1 %}
+                                <li><a href="{% url 'emailContentV2' emailId %}" >{{ emailId }}</a></li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+</body>
+<script>
+
+// set the dimensions and margins of the graph
+var margin = {top: 10, right: 30, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+// get the data
+d3.csv("{% static "enron/a.csv" %}", function(error, data) {
+  if (error) throw error;
+
+
+  // parse the date / time
+var parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S");
+
+var startDate = parseDate(data[1].dtg);
+var endDate = parseDate(data[data.length - 1].dtg);
+
+
+
+// set the ranges
+var x = d3.scaleTime()
+          .domain([new Date(data[0].dtg.split(" ")[0]),
+              new Date(data[data.length - 1].dtg.split(" ")[0])])
+          .rangeRound([0, width]);
+
+
+{% comment %}// set the ranges
+var x = d3.scaleTime()
+          .domain([new Date(1999, 12, 10), new Date(2001, 6, 20)])
+          .rangeRound([0, width]);{% endcomment %}
+var y = d3.scaleLinear()
+          .range([height, 0]);
+
+// set the parameters for the histogram
+var histogram = d3.histogram()
+    .value(function(d) { return d.date; })
+    .domain(x.domain())
+    .thresholds(x.ticks(d3.timeMonth));
+
+// append the svg object to the body of the page
+// append a 'group' element to 'svg'
+// moves the 'group' element to the top left margin
+var svg = d3.select("#figure").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+
+  splitIndex = 1;
+  // format the data
+  data.forEach(function(d) {
+      d.date = parseDate(d.dtg);
+  });
+
+
+  // group the data for the bars
+  var bins = histogram(data);
+
+  // Scale the range of the data in the y domain
+  y.domain([0, d3.max(bins, function(d) { return d.length; })]);
+
+
+
+  var i;
+  var sum = 0;
+
+  for (i = 0; i < bins.length; i++)
+  {
+      sum += bins[i].length
+  }
+
+  var tempSum = 0;
+  var af = sum * 0.5;
+  for (i = 0; i < bins.length; i++)
+  {
+      tempSum += bins[i].length;
+      if (tempSum > af )
+      {
+          splitIndex = i;
+          break;
+      }
+  }
+
+
+
+
+
+  // append the bar rectangles to the svg element
+  svg.selectAll("rect")
+      .data(bins)
+      .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", 1)
+      .attr("transform", function(d) {
+		  return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
+      .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
+      .attr("height", function(d) { return height - y(d.length); })
+      .attr("fill", function (d,i){
+          if (i > splitIndex)
+          return "Salmon"
+            else
+            return "steelblue"});
+
+
+  // add the x Axis
+  svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+  // add the y Axis
+  svg.append("g")
+      .call(d3.axisLeft(y));
+
+});
+
+</script>
+</html>
