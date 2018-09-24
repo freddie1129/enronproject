@@ -6,8 +6,10 @@ from enron.models import AnalysisResult
 from enron.models import Alias
 from enron.models import RawEmail,RawEmailFrom,RawEmailTo,RawEmailCc,RawEmailBCc
 from enron.models import RawEmailFromCore,RawEmailToCore,RawEmailCcCore,RawEmailBCcCore
+from enron.models import RawEmailToExternal, RawEmailBccExternal,RawEmailCcExternal,RawEmailFromExternal
 
 from enron.models import ResultAddress,ResultAddressCore
+from django.db.models import Q
 
 from enron.models import RawCoreEmail
 
@@ -15,13 +17,19 @@ from enron.models import Aliasf
 
 from enron.models import ToEmailNew,CcEmailNew,BccEmailNew
 from enron.models import StaCommunication
+from enron.models import StaffAnalysis
+from enron.models import EmailBrief
 from .emailconst import mailConstant
+
 from enron.models import RawCoreEmail
 import json
 from multiprocessing import Process
 from django.db import connection
 
+from scripts.nlp_pre import preprocess
+
 import os
+import math
 from subprocess import *
 from .Enronlib import EnronEmail
 mailpath = "/root/project/maildir/"
@@ -57,7 +65,62 @@ def run():
     #initResultAddressTable()
     #initRawEmailToTable()
     #initResultAddressCoreTable()
-    splitTimeLine("allen-p")
+    #splitTimeLine("allen-p")
+    #importStressData()
+    #tagCoreEmailSet()
+    #initStaffAnalysis()
+    #calculateStaffAnalysis()
+    #analysis_sta_totals()
+    #
+    # step 1
+    #initCoreDataset()
+    # step 2
+
+
+    #initCoreDataset()
+    #setStaffNameForTables()
+    #initStaffAnalysis()
+
+    #emaillist = RawEmailToExternal.objects.all()
+    #tagName(emaillist)
+    #TagName_RawEmailTo()
+    #TagName_RawEmailCc()
+    #TagName_RawEmailBcc()
+    #analysis_staff()
+
+
+
+
+    l = StaffAnalysis.objects.all()[0:1]
+    for e in l:
+        t = e.mails_to_core_total.split(",")
+        t1 = e.mails_to_core_total_len
+
+        s = e.mails_to_core_send.split(",")
+        s1 = e.mails_to_core_send_len
+
+        r = e.mails_to_core_receive.split(",")
+        r1 = e.mails_to_core_receive_len
+
+
+        es = e.mails_to_ext_send.split(",")
+        es1 = e.mails_to_ext_send_len
+
+
+        er = e.mails_to_ext_receive.split(",")
+        er1 = e.mails_to_ext_receive_len
+
+        p = len(list(set(s + r + es + er)))
+
+
+        print("{0},{1},{2},{3},{4}",t1,s1,r1,es1,er1)
+        print("{0},{1},{2}",t1,p,s1 + r1 + es1 + er1)
+
+        #e.diversity = e.mails_to_core_contact_total
+        #e.density = p / e.diversity
+
+        analysis_ratio(e.name)
+
 
 # select core staff's email and import them into RawEmailSamll
 def initCoreEmail():
@@ -80,7 +143,8 @@ def initRawEmailToTable():
         cursor.execute("INSERT INTO enron_rawemailtocore select * FROM enron_rawemailto WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1) AND e_to IN(SELECT emailAddress FROM enron_alias where isTrust=1)")
         cursor.execute("INSERT INTO enron_rawemailcccore select * FROM enron_rawemailcc WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1) AND e_to IN(SELECT emailAddress FROM enron_alias where isTrust=1)")
         cursor.execute("INSERT INTO enron_rawemailbcccore select * FROM enron_rawemailbcc WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1) AND e_to IN(SELECT emailAddress FROM enron_alias where isTrust=1)")
-    pass
+
+
 
 
 #initialize ResultAddress Table
@@ -535,16 +599,888 @@ def analysis_bcc_mail():
 
 
 def stressAnalysis(text):
-    process = Popen(['java', '-jar', './TensiStrengthMain.jar', 'sentidata', './TensiStrength_Data/', 'explain', "text",
+    process = Popen(['java', '-jar', './scripts/TensiStrengthMain.jar', 'sentidata', './scripts/TensiStrength_Data/', 'explain', "text",
                      text, "urlencoded", "mood", "0"], stdout=PIPE, stderr=PIPE)
     line = process.stdout.readline().decode("utf-8")
-    print("==================")
-    print(line)
-
     ret = line.split("+")
-    relax_level = ret[0]
-    stress_level = ret[1]
+    if len(ret) >= 2:
+        relax_level = ret[0]
+        stress_level = ret[1]
+        return (relax_level,stress_level)
+    else:
+        return False
 
-    return (relax_level,stress_level)
+def importStressData():
+    logfile = open("importStressData.log", "w")
+    allStaff = StaffName.objects.all()
+    staffIndex = 0
+    emailIndex = 0
+    for staff in allStaff:
+        staffIndex += 1
+        staffList = Alias.objects.filter(staff=staff).filter(isTrust=True)
+        addressList = [s.emailAddress for s in staffList]
+        emailList = RawEmailFromCore.objects.filter(e_from__in=addressList)
+        logline = "{0} staff name: {1}\n".format(staffIndex, staff.name)
+        logfile.write(logline)
+        print(logline)
+        print("total: {0}".format(emailList.count()))
+        for email in emailList:
+            content = str.join(" ", preprocess(email.e_content))
+            ret = stressAnalysis(content)
+            if ret != False:
+                email.relax_level = ret[0]
+                email.stress_level = ret[1]
+                email.save()
+            else:
+                errorLog = "    error:{0} {1}\n".format(email.e_id, email.e_path)
+                print(errorLog)
+                logfile.write(errorLog)
+                email.relax_level = 0
+                email.stress_level = 0
+                email.save()
+            if (emailIndex % 100 == 0):
+                print("Finished: {0}".format(emailIndex))
+            emailIndex += 1
+    logfile.close()
 
+def initStaffAnalysis2():
+    #calculate total
+    staffs = StaffAnalysis.objects.all()
+    for idx,staff in enumerate(staffs):
+        frommails = json.load(staff.mailsfrom)
+        tomails = json.load(staff.mailsto)
+        ccmails = json.load(staff.mailsto)
+        bccmails = json.load(staff.mailsto)
+
+
+
+
+
+from django.core.serializers import serialize
+from django.core.serializers.json import DjangoJSONEncoder
+def default(o):
+    return o._asdict()
+def initStaffAnalysis():
+    staffList = StaffAnalysis.objects.all()[0:1]
+    index = 0
+    for staff in staffList:
+        index += 1
+        name = staff.name
+        # with connection.cursor() as cursor:
+        #     cursor.execute("SELECT e_id FROM `enron_rawemailfromcore` WHERE name = %s AND e_date > '1990-01-01 00:00:00' GROUP BY e_date,e_from",
+        #                    (name,))
+        #     rows = cursor.fetchall()
+        #     to_id_list = [e[0] for e in rows]
+        #     staff.mailsfrom = json.dumps(to_id_list)
+        #     staff.mailsfromLen = len(to_id_list)
+
+
+
+
+        ###################################
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT e_id_id,e_date,e_from,e_to,e_from_name,e_to_name FROM enron_rawemailtocore WHERE e_from_name = %s OR e_to_name = %s AND e_date > '1990-01-01 00:00:00' GROUP BY e_date, e_from, e_to",
+                           (name,name))
+            rows = cursor.fetchall()
+            id_list_core_to = [e[0] for e in rows]
+            cursor.execute(
+                "SELECT e_id_id FROM enron_RawEmailToExternal WHERE e_from_name = %s OR e_to_name = %s AND e_date > '1990-01-01 00:00:00' GROUP BY e_date, e_from, e_to",
+                (name, name))
+            rows = cursor.fetchall()
+
+
+
+        mailto = RawEmailToCore.objects.filter(e_id__in=id_list).order_by("e_date")
+        staff.mailsto = serialize('json', mailto, cls=DjangoJSONEncoder)
+        staff.mailstoLen = len(mailto)
+        list(set([mail.e_from_name for mail in mailto] + [mail.e_to_name for mail in mailto]) - set([name]))
+
+
+
+
+
+
+
+        staff.save()
+
+        #staff.mailsto = json.dumps(mail_list)
+        #print(staff.mailsto)
+        #print(mailto)
+
+            #staff.mailsto = json.dumps(to_id_list)
+            #staff.mailstoLen = len(to_id_list)
+            #print(to_id_list)
+            #print(len(to_id_list))
+
+            #print(idList)
+            #print("length: {0}".format(len(idList)))
+
+        # with connection.cursor() as cursor:
+        #     cursor.execute("SELECT e_to_name FROM enron_rawemailtocore WHERE e_from_name = %s AND e_to_name <> %s GROUP BY e_to_name",
+        #                    (name,name))
+        #     rows = cursor.fetchall()
+        #     to_staff_list_to = [e[0] for e in rows]
+        #
+        #     cursor.execute("SELECT e_from_name FROM enron_rawemailtocore WHERE e_from_name <> %s AND e_to_name = %s GROUP BY e_from_name",
+        #                    (name,name))
+        #     rows = cursor.fetchall()
+        #     to_staff_list_from = [e[0] for e in rows]
+        #     staff_list = list(set(to_staff_list_to + to_staff_list_from))
+        #     staff.staff_to = json.dumps(staff_list)
+        #     staff.staff_to_len = len(staff_list)
+        #     print("staff: {0}{1}-{2}-{3}".format(name, len(to_staff_list_to),len(to_staff_list_from),len(staff_list)))
+        #
+        #
+        #
+        #     #print(to_staff_list)
+        #     #print(len(to_staff_list))
+        #
+        # ##################################
+        # with connection.cursor() as cursor:
+        #     cursor.execute("SELECT e_id_id FROM `enron_rawemailcccore` WHERE e_from_name = %s OR e_to_name = %s = %s AND e_date > '1990-01-01 00:00:00' GROUP BY e_date,e_from,e_to",
+        #                    (name,))
+        #     rows = cursor.fetchall()
+        #     to_id_list = [e[0] for e in rows]
+        #     staff.mailscc = json.dumps(to_id_list)
+        #     staff.mailsccLen = len(to_id_list)
+        #
+        #     #print(idList)
+        #     #print("length: {0}".format(len(idList)))
+        # with connection.cursor() as cursor:
+        #     cursor.execute("SELECT name FROM `enron_rawemailcccore` WHERE name_from = %s AND name <> %s GROUP BY name",
+        #                    (name,name))
+        #     rows = cursor.fetchall()
+        #     to_staff_list = [e[0] for e in rows]
+        #     staff.staff_cc = json.dumps(to_staff_list)
+        #     staff.staff_cc_len = len(to_staff_list)
+        #
+        # ##########################
+        # with connection.cursor() as cursor:
+        #     cursor.execute("SELECT e_id_id FROM `enron_rawemailbcccore` WHERE e_from_name = %s OR e_to_name = %s AND e_date > '1990-01-01 00:00:00' GROUP BY e_date,e_from,e_to",
+        #                    (name,))
+        #     rows = cursor.fetchall()
+        #     to_id_list = [e[0] for e in rows]
+        #     staff.mailsbcc = json.dumps(to_id_list)
+        #     staff.mailsbccLen = len(to_id_list)
+        #
+        #     #print(idList)
+        #     #print("length: {0}".format(len(idList)))
+        # with connection.cursor() as cursor:
+        #     cursor.execute("SELECT name FROM `enron_rawemailbcccore` WHERE name_from = %s AND name <> %s GROUP BY name",
+        #                    (name,name))
+        #     rows = cursor.fetchall()
+        #     to_staff_list = [e[0] for e in rows]
+        #     staff.staff_bcc = json.dumps(to_staff_list)
+        #     staff.staff_bcc_len = len(to_staff_list)
+        # print("{0} {1}: from num: {2}, to num: {3}, cc num: {4}, bcc num: {5}".format(index,name,staff.mailsfromLen,staff.mailstoLen,staff.mailsccLen,staff.mailsbccLen))
+        # print("{0} {1}: from num staff: {2}, to num staff: {3}, cc num staff: {4}, bcc num staff: {5}".format(index,name,staff.staff_from_len,staff.staff_to_len,staff.staff_cc_len,staff.staff_bcc_len))
+        # #staff.save()
+    #allStaff = StaffName.objects.all()
+    #aList = [StaffAnalysis(name=staff.name) for staff in allStaff]
+    #StaffAnalysis.objects.bulk_create(aList)
+
+# tag emails by sender's name
+def tagAllRawEmails():
+    emails = RawEmail.objects.all()
+    num = emails.count()
+    index = 0
+    while index < num:
+        e = emails[index]
+        s = Alias.objects.filter(emailAddress=e.e_from)
+        if s.count() >=1:
+            # exist
+            e.e_sender_name = s[0].staff.name
+            e.save()
+        index += 1
+        if (index % 1000 == 0):
+            print("Index：{0}".format(index))
+    print("Done:{0}".format(index))
+
+# tag emails set by name
+def tagAllRawEmailsTo():
+    emails = RawEmailTo.objects.all()
+    num = emails.count()
+    index = 0
+    while index < num:
+        e = emails[index]
+        s = Alias.objects.filter(emailAddress=e.e_from)
+        if s.count() >=1:
+            e.e_form_name = s[0].staff.name
+        s = Alias.objects.filter(emailAddress=e.e_to)
+        if s.count() >= 1:
+            e.e_to_name = s[0].staff.name
+        e.save()
+        index += 1
+        if (index % 1000 == 0):
+            print("Index：{0}".format(index))
+    print("Done:{0}".format(index))
+
+# tag emails by sender's name
+def tagAllRawEmailsCc():
+    emails = RawEmailCc.objects.all()
+    num = emails.count()
+    index = 0
+    while index < num:
+        e = emails[index]
+        if s.count() >=1:
+            e.e_form_name = s[0].staff.name
+        s = Alias.objects.filter(emailAddress=e.e_to)
+        if s.count() >= 1:
+            e.e_to_name = s[0].staff.name
+        e.save()
+        index += 1
+        if (index % 1000 == 0):
+            print("Index：{0}".format(index))
+    print("Done:{0}".format(index))
+
+# tag emails by sender's name
+def tagAllRawEmailsBcc():
+    emails = RawEmailBCc.objects.all()
+    num = emails.count()
+    index = 0
+    while index < num:
+        e = emails[index]
+        if s.count() >=1:
+            e.e_form_name = s[0].staff.name
+        s = Alias.objects.filter(emailAddress=e.e_to)
+        if s.count() >= 1:
+            e.e_to_name = s[0].staff.name
+        e.save()
+        index += 1
+        if (index % 1000 == 0):
+            print("Index：{0}".format(index))
+    print("Done:{0}".format(index))
+
+
+
+
+
+
+
+
+
+def analysis_sta_totals():
+    # calculate communication diversity
+    staff_list = StaffAnalysis.objects.all()
+    for idx, staff in enumerate(staff_list):
+        # the number of staffs this person contracted
+        totalmails = list(set(json.loads(staff.mailsto) + json.loads(staff.mailscc) + json.loads(staff.mailsbcc)))
+        for email_id in totalmails:
+            email = RawEmailFromCore.objects.get(pk = email_id)
+            EmailShot(email.e_id,email.e_date,email.e_from,email)
+            pass
+        staff.totalmails = json.dumps(totalmails)
+        staff.totalmailsLen = len(totalmails)
+
+        totalstaffs = list(set(json.loads(staff.staff_to) + json.loads(staff.staff_cc) + json.loads(staff.staff_bcc)))
+        staff.total_staff = json.dumps(totalstaffs)
+        staff.total_staff_len = len(totalstaffs)
+        staff.save()
+        print("{0}: {1},{2}".format(idx, staff.totalmailsLen,staff.total_staff_len))
+
+
+def calculateStaffAnalysis():
+    # with connection.cursor() as cursor:
+    #     cursor.execute("SELECT COUNT(*) FROM ((SELECT COUNT(*) FROM enron_rawemailfromcore GROUP BY name) AS T)")
+    #     row = cursor.fetchone()
+    #     print(row[0])
+
+    staffList = StaffAnalysis.objects.all()
+    staffNameList = [a.name for a in staffList]
+    for staff in staffList:
+        print("Staff: {0}".format(staff.name))
+
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM ((SELECT COUNT(*) FROM enron_rawemailtocore WHERE name_from = %s AND name <> %s GROUP BY name) as T)",
+                           (staff.name, staff.name))
+            row = cursor.fetchone()
+            communicators_number = row[0]
+            staff.diversity = communicators_number
+
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT MAX(e_id_id) FROM enron_rawemailtocore WHERE (name_from=%s OR name=%s) AND e_date > %s GROUP BY e_date ORDER BY e_date DESC",
+                           (staff.name, staff.name, "1990-01-01 00:00:00"))
+            rows = cursor.fetchall()
+            email_checked_id = [a[0] for a in rows]
+            #print(email_checked_id)
+            #print(len(email_checked_id))
+
+
+        id_collection = "({0})".format(str.join(",", email_checked_id))
+        print(id_collection)
+
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        #emailexchange = RawEmailToCore.objects.filter(Q(name_from=staff.name) | Q(name=staff.name)).order_by("-e_date")
+        emailexchange = RawEmailToCore.objects.filter(e_id__in=email_checked_id).order_by("-e_date")
+        total = emailexchange.count()
+        print("------total----------{0}-------------".format(total))
+        if communicators_number != 0:
+            density = total / communicators_number
+        else:
+            density = 0
+        staff.density = density
+        #communication ratio
+        with connection.cursor() as cursor:
+            #cursor.execute(
+            #    "SELECT MAX(A) FROM ((SELECT COUNT(*) AS A FROM enron_rawemailtocore WHERE name_from = %s AND name <> %s GROUP BY name) as T)",
+            #    (staff.name, staff.name))
+            cursor.execute(
+                "SELECT MAX(A) FROM ((SELECT COUNT(*) AS A FROM enron_rawemailtocore WHERE e_id_id IN %s GROUP BY name) as T)",
+                (id_collection,))
+            row = cursor.fetchone()
+            maxcomm = row[0]
+            if maxcomm != 0:
+                staff.ratio = density / maxcomm
+            else:
+                staff.ratio = 0
+            print("Max comm: {0}, density {1},ration {2}".format(maxcomm,density, staff.ratio))
+        #time ration
+
+        #for e in emailexchange:
+        #    print("{0} {1}".format(e.e_date,e))
+
+
+        print("Staff: {0}, communicator: {1}, Email Number: {2}, Density: {3} Ratio: {4}".format(staff.name, communicators_number,total,density,staff.ratio ))
+
+
+
+
+    #
+    #     #
+    #     cursor.execute("SELECT COUNT(*) FROM enron_rawemailfromcore GROUP BY name")
+    #     row = cursor.fetchall()
+    #     print(len(row))
+
+
+    # staffList = StaffAnalysis.objects.all()[0:10]
+    # for staff in staffList:
+    #     print("Staff: {0}".format(staff.name))
+    #     with connection.cursor() as cursor:
+    #         cursor.execute("SELECT COUNT(*) FROM enron_rawemailtocore WHERE name = %s AND name_from <> %s GROUP BY name", staff.name, staff.name)
+    #         row = cursor.fetchone()
+    #         print(row)
+
+
+
+
+        # staff = StaffName.objects.get(pk=name)
+        # staffAlias = Alias.objects.filter(staff=staff).filter(isTrust=True)
+        # staffEmailAddress = [emailAddress for emailAddress in staffAlias]
+        # toEmails = RawComm.objects.filter(staff_a=staff).exclude(staff_b=staff)
+        #
+        # toNumberQuery = toEmails.aggregate(Sum("number_a_b"))
+        # toNumber = toNumberQuery['number_a_b__sum']
+        #
+        # receiveNumberQuery = toEmails.aggregate(Sum("number_b_a"))
+        # receiveNumber = receiveNumberQuery['number_b_a__sum']
+        #
+        # otherStaffList = StaffName.objects.exclude(name=name)
+        # toMailsFromThisStaff = []
+        # for s in otherStaffList:
+        #     item = toEmails.filter(staff_b=s)[0]
+        #     if item.number_a_b != 0 and item.number_b_a != 0:
+        #         data = json.loads(item.record)
+        #         toMailsFromThisStaff.append((item, data))
+        # toMailsFromThisStaff.sort(key=lambda x: x[0].number_a_b + x[0].number_b_a, reverse=True)
+        #
+        #
+        #
+        # pass
+
+# step 1 initialize core email table
+def initCoreDataset():
+    with connection.cursor() as cursor:
+        #cursor.execute("DELETE FROM enron_rawemailfromcore")
+        cursor.execute("DELETE FROM enron_rawemailtocore")
+        cursor.execute("DELETE FROM enron_rawemailcccore")
+        cursor.execute("DELETE FROM enron_rawemailbcccore")
+
+        #cursor.execute("INSERT INTO enron_rawemailfromcore(e_id, e_date, e_from, e_subject, e_content, e_path, e_from_name) SELECT email.e_id, email.e_date, email.e_from, email.e_subject, email.e_content, email.e_path,alias.staff_id FROM enron_rawemailfrom AS email INNER JOIN enron_alias AS alias ON email.e_from = alias.emailAddress AND isTrust=1")
+        #cursor.execute("INSERT INTO enron_rawemailfromcore(e_id, e_date, e_from, e_subject, e_content, e_path, e_from_name) (SELECT email.e_id, email.e_date, email.e_from, email.e_subject, email.e_content, email.e_path, alias.staff_id FROM (SELECT * FROM enron_rawemailfrom WHERE e_from IN (SELECT emailAddress FROM enron_alias WHERE isTrust=1) LIMIT 1000) AS email INNER JOIN enron_alias AS alias ON email.e_from = alias.emailAddress LIMIT 100)")
+
+
+        #cursor.execute("INSERT INTO enron_rawemailfromcore(e_id,e_date,e_from,e_subject,e_content,e_path) SELECT e_id,e_date,e_from,e_subject,e_content,e_path FROM enron_rawemailfrom WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1)")
+        cursor.execute("INSERT INTO enron_rawemailtocore(e_id_id,e_date,e_from,e_to) SELECT e_id_id,e_date,e_from,e_to FROM enron_rawemailto WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1) AND e_to IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1)")
+        cursor.execute("INSERT INTO enron_rawemailcccore(e_id_id,e_date,e_from,e_to) SELECT e_id_id,e_date,e_from,e_to FROM enron_rawemailcc WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1) AND e_to IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1)")
+        cursor.execute("INSERT INTO enron_rawemailbcccore(e_id_id,e_date,e_from,e_to)  SELECT e_id_id,e_date,e_from,e_to FROM enron_rawemailbcc WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1) AND e_to IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1)")
+
+
+def initExternalDataset():
+    with connection.cursor() as cursor:
+
+        #cursor.execute("DELETE FROM enron_rawemailfromexternal")
+        #cursor.execute(
+        #    "INSERT INTO enron_rawemailfromexternal(e_id_id,e_date,e_from,e_to) SELECT e_id_id,e_date,e_from,e_to FROM enron_rawemailto WHERE e_from NOT IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1) AND e_to IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1)")
+
+
+        cursor.execute("DELETE FROM enron_RawEmailToExternal")
+        cursor.execute(
+            "INSERT INTO enron_RawEmailToExternal(e_id_id,e_date,e_from,e_to) SELECT e_id_id,e_date,e_from,e_to FROM enron_rawemailto WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1) AND e_to NOT IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1)")
+
+        cursor.execute("DELETE FROM enron_rawemailccexternal")
+        cursor.execute(
+            "INSERT INTO enron_rawemailccexternal(e_id_id,e_date,e_from,e_to) SELECT e_id_id,e_date,e_from,e_to FROM enron_rawemailcc WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1) AND e_to NOT IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1)")
+
+        cursor.execute("DELETE FROM enron_rawemailbccexternal")
+        cursor.execute(
+            "INSERT INTO enron_rawemailbccexternal(e_id_id,e_date,e_from,e_to) SELECT e_id_id,e_date,e_from,e_to FROM enron_rawemailbcc WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1) AND e_to NOT IN(SELECT emailAddress FROM enron_alias WHERE isTrust=1)")
+
+
+
+
+# step 2 insert staff name to the core tables
+emaillist = RawEmailToExternal.objects.all()
+def tagName(emaillist):
+    index = 0
+    print("Tag Bcc table. {0}".format(emaillist.count()))
+    for email in emaillist:
+        #al = Alias.objects.filter(emailAddress=email.e_to)
+        #if al.count() >= 1:
+        #    email.e_to_name = al[0].staff.name
+        al = Alias.objects.filter(emailAddress=email.e_from)
+        if al.count() >= 1:
+            email.e_from_name = al[0].staff.name
+        email.save()
+        index += 1
+        if index % 500 == 0:
+            print("Bcc finish {0}".format(index))
+
+
+def indexOf(list, e):
+    try:
+        return list.index(e)
+    except ValueError:
+        return False
+
+
+
+
+def TagName_RawEmailTo():
+
+    with connection.cursor() as cursor:
+        cursor.execute("UPDATE enron_rawemailto SET e_from_name = 'unknow' WHERE e_from NOT IN(SELECT emailAddress FROM enron_alias WHERE isTrust = 1)")
+        cursor.execute("UPDATE enron_rawemailto SET e_to_name = 'unknow' WHERE e_to NOT IN(SELECT emailAddress FROM enron_alias WHERE isTrust = 1)")
+
+    staff_list = [s for s in StaffName.objects.all()]
+    for idx, staff in enumerate(staff_list):
+        with connection.cursor() as cursor:
+            cursor.execute("UPDATE enron_rawemailto SET e_from_name = %s WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust = 1 AND staff_id = %s)",(staff.name,staff.name))
+            cursor.execute("UPDATE enron_rawemailto SET e_to_name = %s WHERE e_to IN(SELECT emailAddress FROM enron_alias WHERE isTrust = 1 AND staff_id = %s)",(staff.name,staff.name))
+        print("{0}:{1}".format(idx,staff.name))
+
+
+def TagName_RawEmailCc():
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "UPDATE enron_rawemailcc SET e_from_name = %s WHERE e_from NOT IN(SELECT emailAddress FROM enron_alias WHERE isTrust = 1)",("unknow",))
+        cursor.execute(
+            "UPDATE enron_rawemailcc SET e_to_name = %s WHERE e_to NOT IN(SELECT emailAddress FROM enron_alias WHERE isTrust = 1)",("unknow",))
+
+    staff_list = [s for s in StaffName.objects.all()]
+    for idx, staff in enumerate(staff_list):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE enron_rawemailcc SET e_from_name = %s WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust = 1 AND staff_id = %s)",
+                (staff.name, staff.name))
+            cursor.execute(
+                "UPDATE enron_rawemailcc SET e_to_name = %s WHERE e_to IN(SELECT emailAddress FROM enron_alias WHERE isTrust = 1 AND staff_id = %s)",
+                (staff.name, staff.name))
+        print("tag cc {0}:{1}".format(idx, staff.name))
+
+def TagName_RawEmailBcc():
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "UPDATE enron_rawemailbcc SET e_from_name = %s WHERE e_from NOT IN(SELECT emailAddress FROM enron_alias WHERE isTrust = 1)",("unknow",))
+        cursor.execute(
+            "UPDATE enron_rawemailbcc SET e_to_name = %s WHERE e_to NOT IN(SELECT emailAddress FROM enron_alias WHERE isTrust = 1)",("unknow",))
+
+    staff_list = [s for s in StaffName.objects.all()]
+    for idx, staff in enumerate(staff_list):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE enron_rawemailbcc SET e_from_name = %s WHERE e_from IN(SELECT emailAddress FROM enron_alias WHERE isTrust = 1 AND staff_id = %s)",
+                (staff.name, staff.name))
+            cursor.execute(
+                "UPDATE enron_rawemailbcc SET e_to_name = %s WHERE e_to IN(SELECT emailAddress FROM enron_alias WHERE isTrust = 1 AND staff_id = %s)",
+                (staff.name, staff.name))
+        print("tag bcc {0}:{1}".format(idx, staff.name))
+
+
+def formail(list):
+    return str.join(",",list)
+
+
+def analysis_ratio(name):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT e_to_name, COUNT(*) as num FROM enron_rawemailto WHERE e_from_name = %s AND e_to_name <> %s AND e_to_name <> 'unknow' GROUP BY e_to_name",
+            (name,name))
+        to_summery = cursor.fetchall()
+        print(to_summery)
+
+        cursor.execute(
+            "SELECT e_from_name, COUNT(*) as num FROM enron_rawemailto WHERE e_to_name = %s AND e_from_name <> %s AND e_from_name <> 'unknow' GROUP BY e_from_name",
+            (name, name))
+        from_summery = cursor.fetchall()
+        print(from_summery)
+
+        if len(to_summery) > len(from_summery):
+            a_list = to_summery
+            b_list = from_summery
+        else:
+            a_list = from_summery
+            b_list = to_summery
+
+
+
+        output = []
+        for a in a_list:
+            to_name = a[0]
+            to_num = a[1]
+            for b in b_list:
+                if b[0] == to_name:
+                    to_num += b[1]
+                    break
+            output.append((to_name,to_num))
+
+        print(output)
+        m = max(output, key=lambda item: item[1])
+
+        print(m)
+
+
+
+
+def analysis_staff():
+    staff_list = [s for s in StaffAnalysis.objects.all()[0:1]]
+    start_time = "1990-01-01 00:00:00"
+    staff_list = StaffAnalysis.objects.all()
+    idx = 0
+    for staff in staff_list:
+        idx += 1
+
+        with connection.cursor() as cursor:
+
+            #operation in EailTo
+            cursor.execute(
+                "SELECT MAX(e_id_id) FROM enron_rawemailto WHERE (e_from_name = %s OR e_to_name = %s) AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                (staff.name, staff.name, start_time))
+            rows = cursor.fetchall()
+            id_toset_total = [a[0] for a in rows]
+
+            cursor.execute("SELECT MAX(e_id_id) FROM enron_rawemailto WHERE (e_from_name = %s AND e_to_name <> 'unknow') AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",(staff.name,  start_time))
+            rows = cursor.fetchall()
+            id_toset_send_internal = [a[0] for a in rows]
+
+            cursor.execute("SELECT MAX(e_id_id) FROM enron_rawemailto WHERE (e_from_name <> 'unkonw' AND e_to_name = %s) AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",( staff.name, start_time))
+            rows = cursor.fetchall()
+            id_toset_receive_internal = [a[0] for a in rows]
+
+            cursor.execute(
+                "SELECT MAX(e_id_id) FROM enron_rawemailto WHERE (e_from_name = %s AND e_to_name = 'unknow') AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                (staff.name, start_time))
+            rows = cursor.fetchall()
+            id_toset_send_external = [a[0] for a in rows]
+
+            cursor.execute(
+                "SELECT MAX(e_id_id) FROM enron_rawemailto WHERE (e_from_name = 'unknow' AND e_to_name = %s) AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                (staff.name, start_time))
+            rows = cursor.fetchall()
+            id_toset_receive_external = [a[0] for a in rows]
+            print("To Email Subset: {0} {1}: {2},{3},{4},{5},{6}".format(idx, staff.name, len(id_toset_total),
+                                                                         len(id_toset_send_internal),
+                                                                         len(id_toset_receive_internal),
+                                                                         len(id_toset_send_external),
+                                                                         len(id_toset_receive_external)))
+
+            staff.mails_to_core_total = str.join(",",id_toset_total)  #   json.dumps(id_toset_total)
+            staff.mails_to_core_total_len = len(id_toset_total)
+            staff.mails_to_core_send = str.join(",",id_toset_send_internal)  # json.dumps(id_toset_send_internal)
+            staff.mails_to_core_send_len = len(id_toset_send_internal)
+            staff.mails_to_core_receive = str.join(",",id_toset_receive_internal)  # json.dumps(id_toset_receive_internal)
+            staff.mails_to_core_receive_len = len(id_toset_receive_internal)
+            staff.mails_to_ext_send = str.join(",",id_toset_send_external)  # json.dumps(id_toset_send_external)
+            staff.mails_to_ext_send_len = len(id_toset_send_external)
+            staff.mails_to_ext_receive = str.join(",",id_toset_receive_external)  # json.dumps(id_toset_send_external)
+            staff.mails_to_ext_receive_len = len(id_toset_receive_external)
+
+
+            #operation in EailCC
+            cursor.execute(
+                "SELECT MAX(e_id_id) FROM enron_rawemailcc WHERE (e_from_name = %s OR e_to_name = %s) AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                (staff.name, staff.name, start_time))
+            rows = cursor.fetchall()
+            id_ccset_total = [a[0] for a in rows]
+
+            cursor.execute(
+                "SELECT MAX(e_id_id) FROM enron_rawemailcc WHERE (e_from_name = %s AND e_to_name <> 'unknow') AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                (staff.name, start_time))
+            rows = cursor.fetchall()
+            id_ccset_send_internal = [a[0] for a in rows]
+
+            cursor.execute(
+                "SELECT MAX(e_id_id) FROM enron_rawemailcc WHERE (e_from_name <> 'unkonw' AND e_to_name = %s) AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                (staff.name, start_time))
+            rows = cursor.fetchall()
+            id_ccset_receive_internal = [a[0] for a in rows]
+
+            cursor.execute(
+                "SELECT MAX(e_id_id) FROM enron_rawemailcc WHERE (e_from_name = %s AND e_to_name = 'unknow') AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                (staff.name, start_time))
+            rows = cursor.fetchall()
+            id_ccset_send_external = [a[0] for a in rows]
+
+            cursor.execute(
+                "SELECT MAX(e_id_id) FROM enron_rawemailcc WHERE (e_from_name = 'unknow' AND e_to_name = %s) AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                (staff.name, start_time))
+            rows = cursor.fetchall()
+            id_ccset_receive_external = [a[0] for a in rows]
+            print("CC Email Subset: {0} {1}: {2},{3},{4},{5},{6}".format(idx, staff.name, len(id_ccset_total),
+                                                                         len(id_ccset_send_internal),
+                                                                         len(id_ccset_receive_internal),
+                                                                         len(id_ccset_send_external),
+                                                                         len(id_ccset_receive_external)))
+            staff.mails_cc_core_total = str.join(",", id_ccset_total)  # json.dumps(id_toset_total)
+            staff.mails_cc_core_total_len = len(id_ccset_total)
+            staff.mails_cc_core_send = str.join(",", id_ccset_send_internal)  # json.dumps(id_toset_send_internal)
+            staff.mails_cc_core_send_len = len(id_ccset_send_internal)
+            staff.mails_cc_core_receive = str.join(",",
+                                                   id_ccset_receive_internal)  # json.dumps(id_toset_receive_internal)
+            staff.mails_cc_core_receive_len = len(id_ccset_receive_internal)
+            staff.mails_cc_ext_send = str.join(",", id_ccset_send_external)  # json.dumps(id_toset_send_external)
+            staff.mails_cc_ext_send_len = len(id_ccset_send_external)
+            staff.mails_cc_ext_receive = str.join(",", id_ccset_receive_external)  # json.dumps(id_toset_send_external)
+            staff.mails_cc_ext_receive_len = len(id_ccset_receive_external)
+
+            # operation in EailCC
+            cursor.execute(
+                "SELECT MAX(e_id_id) FROM enron_rawemailbcc WHERE (e_from_name = %s OR e_to_name = %s) AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                (staff.name, staff.name, start_time))
+            rows = cursor.fetchall()
+            id_toset_total = [a[0] for a in rows]
+
+            cursor.execute(
+                "SELECT MAX(e_id_id) FROM enron_rawemailbcc WHERE (e_from_name = %s AND e_to_name <> 'unknow') AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                (staff.name, start_time))
+            rows = cursor.fetchall()
+            id_toset_send_internal = [a[0] for a in rows]
+
+            cursor.execute(
+                "SELECT MAX(e_id_id) FROM enron_rawemailbcc WHERE (e_from_name <> 'unkonw' AND e_to_name = %s) AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                (staff.name, start_time))
+            rows = cursor.fetchall()
+            id_toset_receive_internal = [a[0] for a in rows]
+
+            cursor.execute(
+                "SELECT MAX(e_id_id) FROM enron_rawemailbcc WHERE (e_from_name = %s AND e_to_name = 'unknow') AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                (staff.name, start_time))
+            rows = cursor.fetchall()
+            id_toset_send_external = [a[0] for a in rows]
+
+            cursor.execute(
+                "SELECT MAX(e_id_id) FROM enron_rawemailbcc WHERE (e_from_name = 'unknow' AND e_to_name = %s) AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                (staff.name, start_time))
+            rows = cursor.fetchall()
+            id_toset_receive_external = [a[0] for a in rows]
+            print("BCC Email Subset: {0} {1}: {2},{3},{4},{5},{6}".format(idx, staff.name, len(id_toset_total),
+                                                                         len(id_toset_send_internal),
+                                                                         len(id_toset_receive_internal),
+                                                                         len(id_toset_send_external),
+                                                                         len(id_toset_receive_external)))
+
+            staff.mails_bcc_core_total = str.join(",", id_toset_total)  # json.dumps(id_toset_total)
+            staff.mails_bcc_core_total_len = len(id_toset_total)
+            staff.mails_bcc_core_send = str.join(",", id_toset_send_internal)  # json.dumps(id_toset_send_internal)
+            staff.mails_bcc_core_send_len = len(id_toset_send_internal)
+            staff.mails_bcc_core_receive = str.join(",",
+                                                   id_toset_receive_internal)  # json.dumps(id_toset_receive_internal)
+            staff.mails_bcc_core_receive_len = len(id_toset_receive_internal)
+            staff.mails_bcc_ext_send = str.join(",", id_toset_send_external)  # json.dumps(id_toset_send_external)
+            staff.mails_bcc_ext_send_len = len(id_toset_send_external)
+            staff.mails_bcc_ext_receive = str.join(",", id_toset_receive_external)  # json.dumps(id_toset_send_external)
+            staff.mails_bcc_ext_receive_len = len(id_toset_receive_external)
+
+            # analysis communicationor To Email
+            cursor.execute(
+                "SELECT e_to_name FROM enron_rawemailto WHERE e_from_name = %s AND e_to_name <> %s AND e_to_name <> 'unknow' GROUP BY e_to_name",
+                (staff.name, staff.name))
+            rows = cursor.fetchall()
+            send_name = [a[0] for a in rows]
+
+            cursor.execute(
+                "SELECT e_from_name FROM enron_rawemailto WHERE e_from_name <> %s AND e_from_name <> 'unkonw' AND e_to_name = %s GROUP BY e_from_name",
+                (staff.name, staff.name))
+            rows = cursor.fetchall()
+            receive_name = [a[0] for a in rows]
+            total_name = list(set(send_name + receive_name))
+            print("To Email Subset Staff: {0} {1}: {2},{3},{4}".format(idx,
+                                                                       staff.name,
+                                                                       len(total_name),
+                                                                       len(send_name),
+                                                                       len(receive_name)
+                                                                       ))
+
+            staff.mails_to_core_contact_total = str.join(",",total_name)  #json.dumps(total_name)
+            staff.mails_to_core_contact_total_len = len(total_name)
+            staff.mails_to_core_contact_send = str.join(",",send_name) #json.dumps(send_name)
+            staff.mails_to_core_contact_send_len = len(send_name)
+            staff.mails_to_ext_contact_receive = str.join(",",receive_name) #json.dumps(receive_name)
+            staff.mails_to_ext_contact_receive_len = len(receive_name)
+
+            # analysis communicationor To Email
+            cursor.execute(
+                "SELECT e_to_name FROM enron_rawemailcc WHERE e_from_name = %s AND e_to_name <> %s AND e_to_name <> 'unknow' GROUP BY e_to_name",
+                (staff.name, staff.name))
+            rows = cursor.fetchall()
+            send_name = [a[0] for a in rows]
+
+            cursor.execute(
+                "SELECT e_from_name FROM enron_rawemailcc WHERE e_from_name <> %s AND e_from_name <> 'unkonw' AND e_to_name = %s GROUP BY e_from_name",
+                (staff.name, staff.name))
+            rows = cursor.fetchall()
+            receive_name = [a[0] for a in rows]
+            total_name = list(set(send_name + receive_name))
+            print("Cc Email Subset Staff: {0} {1}: {2},{3},{4}".format(idx,
+                                                                       staff.name,
+                                                                       len(total_name),
+                                                                       len(send_name),
+                                                                       len(receive_name)
+                                                                       ))
+
+            staff.mails_cc_core_contact_total = str.join(",", total_name)  # json.dumps(total_name)
+            staff.mails_cc_core_contact_total_len = len(total_name)
+            staff.mails_cc_core_contact_send = str.join(",", send_name)  # json.dumps(send_name)
+            staff.mails_cc_core_contact_send_len = len(send_name)
+            staff.mails_cc_ext_contact_receive = str.join(",", receive_name)  # json.dumps(receive_name)
+            staff.mails_cc_ext_contact_receive_len = len(receive_name)
+
+            # analysis communicationor To Email
+            cursor.execute(
+                "SELECT e_to_name FROM enron_rawemailbcc WHERE e_from_name = %s AND e_to_name <> %s AND e_to_name <> 'unknow' GROUP BY e_to_name",
+                (staff.name, staff.name))
+            rows = cursor.fetchall()
+            send_name = [a[0] for a in rows]
+
+            cursor.execute(
+                "SELECT e_from_name FROM enron_rawemailbcc WHERE e_from_name <> %s AND e_from_name <> 'unkonw' AND e_to_name = %s GROUP BY e_from_name",
+                (staff.name, staff.name))
+            rows = cursor.fetchall()
+            receive_name = [a[0] for a in rows]
+            total_name = list(set(send_name + receive_name))
+            print("Bcc Email Subset Staff: {0} {1}: {2},{3},{4}".format(idx,
+                                                                       staff.name,
+                                                                       len(total_name),
+                                                                       len(send_name),
+                                                                       len(receive_name)
+                                                                       ))
+
+            staff.mails_bcc_core_contact_total = str.join(",", total_name)  # json.dumps(total_name)
+            staff.mails_bcc_core_contact_total_len = len(total_name)
+            staff.mails_bcc_core_contact_send = str.join(",", send_name)  # json.dumps(send_name)
+            staff.mails_bcc_core_contact_send_len = len(send_name)
+            staff.mails_bcc_ext_contact_receive = str.join(",", receive_name)  # json.dumps(receive_name)
+            staff.mails_bcc_ext_contact_receive_len = len(receive_name)
+
+        staff.save()
+
+
+
+
+
+
+
+
+
+
+
+
+def TagName_RawEmailToV2():
+    emaillist = RawEmailTo.objects.all()[375500:]
+    num = emaillist.count()
+    index = 0
+    print("Tag RawEmailTo Table. {0}".format(num))
+    address = [e.emailAddress for e in Alias.objects.filter(isTrust=True)]
+    name = [e.staff.name for e in Alias.objects.filter(isTrust=True)]
+    while index < num:
+        email = emaillist[index]
+        from_index = indexOf(address,email.e_from)
+        if from_index == False:
+            email.e_from_name = "unknow"
+        else:
+            email.e_from_name = name[from_index]
+
+        to_index = indexOf(address, email.e_to)
+        if to_index == False:
+            email.e_to_name = "unknow"
+        else:
+            email.e_to_name = name[to_index]
+        email.save()
+        index += 1
+        if index % 500 == 0:
+            print("Finished: {0}".format(index))
+
+
+
+
+
+def setStaffNameForTables():
+    emaillist = RawEmailFromCore.objects.all()
+    print("Tag From table. {0}".format(emaillist.count()))
+    index = 0
+    for email in emaillist:
+        al = Alias.objects.filter(emailAddress=email.e_from)
+        if al.count() >= 1:
+            email.e_from_name = al[0].staff.name
+            email.save()
+        index += 1
+        if index % 500 == 0:
+            print("From finish {0}".format(index))
+
+    index = 0
+    emaillist = RawEmailToCore.objects.all()
+    print("Tag To table. {0}".format(emaillist.count()))
+    for email in emaillist:
+        al = Alias.objects.filter(emailAddress=email.e_to)
+        if al.count() >= 1:
+            email.e_to_name = al[0].staff.name
+        al = Alias.objects.filter(emailAddress=email.e_from)
+        if al.count() >= 1:
+            email.e_from_name = al[0].staff.name
+        email.save()
+        index += 1
+        if index % 500 == 0:
+            print("To finish {0}".format(index))
+
+    index = 0
+    emaillist = RawEmailCcCore.objects.all()
+    print("Tag Cc table. {0}".format(emaillist.count()))
+    for email in emaillist:
+        al = Alias.objects.filter(emailAddress=email.e_to)
+        if al.count() >= 1:
+            email.e_to_name = al[0].staff.name
+        al = Alias.objects.filter(emailAddress=email.e_from)
+        if al.count() >= 1:
+            email.e_from_name = al[0].staff.name
+        email.save()
+        index += 1
+        if index % 500 == 0:
+            print("Cc finish {0}".format(index))
+
+    print("Tag BCc table")
+    index = 0
+    emaillist = RawEmailBCcCore.objects.all()
+    print("Tag Bcc table. {0}".format(emaillist.count()))
+    for email in emaillist:
+        al = Alias.objects.filter(emailAddress=email.e_to)
+        if al.count() >= 1:
+            email.e_to_name = al[0].staff.name
+        al = Alias.objects.filter(emailAddress=email.e_from)
+        if al.count() >= 1:
+            email.e_from_name = al[0].staff.name
+        email.save()
+        index += 1
+        if index % 500 == 0:
+            print("Bcc finish {0}".format(index))
+
+# step 3 calculate staff analysis data
 

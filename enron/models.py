@@ -29,6 +29,114 @@ class StaffName(models.Model):
         verbose_name = "Enron Staff"
         verbose_name_plural = "Enron Staffs"
 
+class StaffAnalysis(models.Model):
+    name = models.CharField(max_length=64,primary_key=True)
+    diversity = models.FloatField(blank=True,null=True)
+    density = models.FloatField(blank=True,null=True)
+    ratio = models.FloatField(blank=True,null=True)
+    time_ratio = models .FloatField(blank=True,null=True)
+    sentiment = models.FloatField(blank=True,null=True)
+    topic_change = models.FloatField(blank=True,null=True)
+    relax_level = models.FloatField(blank=True,null=True)
+    stress_level = models.FloatField(blank=True,null=True)
+
+    mails_to_core_total = models.TextField(blank=True, null=True, default=None)
+    mails_to_core_total_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_to_core_send = models.TextField(blank=True, null=True, default=None)
+    mails_to_core_send_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_to_core_receive = models.TextField(blank=True, null=True, default=None)
+    mails_to_core_receive_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_to_ext_send = models.TextField(blank=True, null=True, default=None)
+    mails_to_ext_send_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_to_ext_receive = models.TextField(blank=True, null=True, default=None)
+    mails_to_ext_receive_len = models.IntegerField(blank=True, null=True, default=0)
+
+    mails_to_core_contact_total = models.TextField(blank=True, null=True, default=None)
+    mails_to_core_contact_total_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_to_core_contact_send = models.TextField(blank=True, null=True, default=None)
+    mails_to_core_contact_send_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_to_ext_contact_receive = models.TextField(blank=True, null=True, default=None)
+    mails_to_ext_contact_receive_len = models.IntegerField(blank=True, null=True, default=0)
+
+    mails_cc_core_total = models.TextField(blank=True, null=True, default=None)
+    mails_cc_core_total_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_cc_core_send = models.TextField(blank=True, null=True, default=None)
+    mails_cc_core_send_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_cc_core_receive = models.TextField(blank=True, null=True, default=None)
+    mails_cc_core_receive_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_cc_ext_send = models.TextField(blank=True, null=True, default=None)
+    mails_cc_ext_send_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_cc_ext_receive = models.TextField(blank=True, null=True, default=None)
+    mails_cc_ext_receive_len = models.IntegerField(blank=True, null=True, default=0)
+
+    mails_cc_core_contact_total = models.TextField(blank=True, null=True, default=None)
+    mails_cc_core_contact_total_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_cc_core_contact_send = models.TextField(blank=True, null=True, default=None)
+    mails_cc_core_contact_send_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_cc_ext_contact_receive = models.TextField(blank=True, null=True, default=None)
+    mails_cc_ext_contact_receive_len = models.IntegerField(blank=True, null=True, default=0)
+
+    mails_bcc_core_total = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_core_total_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_bcc_core_send = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_core_send_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_bcc_core_receive = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_core_receive_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_bcc_ext_send = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_ext_send_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_bcc_ext_receive = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_ext_receive_len = models.IntegerField(blank=True, null=True, default=0)
+
+    mails_bcc_core_contact_total = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_core_contact_total_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_bcc_core_contact_send = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_core_contact_send_len = models.IntegerField(blank=True, null=True, default=0)
+    mails_bcc_ext_contact_receive = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_ext_contact_receive_len = models.IntegerField(blank=True, null=True, default=0)
+
+
+
+
+
+
+
+
+
+
+    # mails sent by this staff, including the mails to external person
+    #mailsfrom = models.TextField(blank=True, null=True, default=None)
+    #mailsfromLen = models.IntegerField(blank=True, null=True, default=0)
+    #staff_from = models.TextField(blank=True, null=True, default=None)
+    #staff_from_len = models.IntegerField(blank=True, null=True, default=0)
+
+    # mails sent to the core staffs by this staff
+    #mailsto = models.TextField(blank=True, null=True, default=None)
+    #mailstoLen = models.IntegerField(blank=True, null=True, default=0)
+    #to_staff_to = models.TextField(blank=True, null=True, default=None)
+    #to_staff_to_len = models.IntegerField(blank=True, null=True, default=0)
+
+    # mails sent cc to the core staffs by this staff
+    #mailscc = models.TextField(blank=True, null=True, default=None)
+    #mailsccLen = models.IntegerField(blank=True, null=True, default=0)
+    #staff_cc = models.TextField(blank=True, null=True, default=None)
+    #staff_cc_len = models.IntegerField(blank=True, null=True, default=0)
+
+
+    # mails sent bcc to the core staffs by this staff
+    #mailsbcc = models.TextField(blank=True, null=True, default=None)
+    #mailsbccLen = models.IntegerField(blank=True, null=True, default=0)
+    #staff_bcc = models.TextField(blank=True, null=True, default=None)
+    #staff_bcc_len = models.IntegerField(blank=True, null=True, default=0)
+
+    # total mails to, cc, bcc
+    #totalmails = models.TextField(blank=True, null=True, default=None)
+    #totalmailsLen = models.IntegerField(blank=True, null=True, default=0)
+    #total_staff = models.TextField(blank=True, null=True, default=None)
+    #total_staff_len = models.IntegerField(blank=True, null=True, default=0)
+
+    def __str__(self):
+        return self.name
+
 
 class Aliasf(models.Model):
     staff = models.ForeignKey(StaffName, on_delete=models.CASCADE)
@@ -47,6 +155,16 @@ class Alias(models.Model):
 
         def __str__(self):
             return self.emailAddress
+
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+class JsonSerializable(object):
+    def toJson(self):
+        return json.dumps(self.__dict__, cls=DjangoJSONEncoder)
+
+    def __repr__(self):
+        return self.toJson()
+
 
 
 
@@ -100,6 +218,7 @@ class RawEmail(models.Model):
     e_x_filename =  models.TextField(blank=True, null=True, default=None)
     e_content =  models.TextField(blank=True, null=True, default=None)
     e_path = models.CharField(max_length=128,blank=True, null=True, default=None)
+    e_sender_name = models.CharField(max_length=128,blank=True, null=True, default=None)
 
     def __str__(self):
         return self.e_id
@@ -124,6 +243,8 @@ class RawCoreEmail(models.Model):
     e_x_filename =  models.TextField(blank=True, null=True, default=None)
     e_content =  models.TextField(blank=True, null=True, default=None)
     e_path = models.CharField(max_length=128,blank=True, null=True, default=None)
+    e_sender_name = models.CharField(max_length=128,blank=True, null=True, default=None)
+
 
     def __str__(self):
         return self.e_id
@@ -207,41 +328,10 @@ class RawEmailFrom(models.Model):
     e_subject = models.CharField(blank=True, null=True, default=None,max_length=1000)
     e_content =  models.TextField(blank=True, null=True, default=None)
     e_path = models.CharField(blank=True, null=True, default=None,max_length=200)
+    e_sender_name = models.CharField(max_length=128,blank=True, null=True, default=None)
 
     def __str__(self):
         return "{0} From {1}".format(self.e_id, self.e_from)
-
-
-
-class RawEmailTo(models.Model):
-    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
-    e_date = models.DateTimeField()
-    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
-    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
-
-    def __str__(self):
-        return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
-
-class RawEmailCc(models.Model):
-    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
-    e_date = models.DateTimeField()
-    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
-    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
-
-
-    def __str__(self):
-        return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
-
-
-
-class RawEmailBCc(models.Model):
-    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
-    e_date = models.DateTimeField()
-    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
-    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
-
-    def __str__(self):
-        return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
 
 
 class RawEmailFromCore(models.Model):
@@ -253,11 +343,75 @@ class RawEmailFromCore(models.Model):
     e_path = models.CharField(blank=True, null=True, default=None,max_length=200)
     relax_level = models.IntegerField(blank=True, null=True)
     stress_level = models.IntegerField(blank=True, null=True)
-
+    e_from_name = models.CharField(blank=True,null=True, max_length=64)
 
     def __str__(self):
         return "{0} From {1}".format(self.e_id, self.e_from)
 
+
+
+# email from core staff to external person
+class RawEmailFromExternal(models.Model):
+    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_from_name = models.CharField(blank=True,null=True, max_length=128)
+    e_to_name = models.CharField(blank=True,null=True, max_length=128)
+
+    def __str__(self):
+        return "{0}-->{1}".format(self.e_from_name, self.e_to_name)
+
+
+# email from core staff to external person
+class RawEmailToExternal(models.Model):
+    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_from_name = models.CharField(blank=True,null=True, max_length=128)
+    e_to_name = models.CharField(blank=True,null=True, max_length=128)
+
+    def __str__(self):
+        return "{0}-->{1}".format(self.e_from_name, self.e_to_name)
+
+class RawEmailCcExternal(models.Model):
+    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_from_name = models.CharField(blank=True,null=True, max_length=128)
+    e_to_name = models.CharField(blank=True,null=True, max_length=128)
+
+    def __str__(self):
+        return "{0}-->{1}".format(self.e_from_name, self.e_to_name)
+
+class RawEmailBccExternal(models.Model):
+    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_from_name = models.CharField(blank=True,null=True, max_length=128)
+    e_to_name = models.CharField(blank=True,null=True, max_length=128)
+
+    def __str__(self):
+        return "{0}-->{1}".format(self.e_from_name, self.e_to_name)
+
+
+
+class RawEmailTo(models.Model):
+    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_from_name = models.CharField(max_length=128,blank=True, null=True, default=None)
+    e_to_name = models.CharField(max_length=128,blank=True, null=True, default=None)
+
+
+
+
+    def __str__(self):
+        return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
 
 
 class RawEmailToCore(models.Model):
@@ -265,20 +419,47 @@ class RawEmailToCore(models.Model):
     e_date = models.DateTimeField()
     e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
     e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_from_name = models.CharField(blank=True,null=True, max_length=128)
+    e_to_name = models.CharField(blank=True,null=True, max_length=128)
+
+    def __str__(self):
+        return "{0}-->{1}".format(self.e_from_name, self.e_to_name)
+
+
+class RawEmailCc(models.Model):
+    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_from_name = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to_name = models.CharField(max_length=128, blank=True, null=True, default=None)
 
     def __str__(self):
         return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
+
 
 class RawEmailCcCore(models.Model):
     e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
     e_date = models.DateTimeField()
     e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
     e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
-
+    e_from_name = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to_name = models.CharField(max_length=128, blank=True, null=True, default=None)
 
     def __str__(self):
         return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
 
+
+class RawEmailBCc(models.Model):
+    e_id =  models.ForeignKey(RawEmailFrom, on_delete=models.CASCADE)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_from_name = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to_name = models.CharField(max_length=128, blank=True, null=True, default=None)
+
+    def __str__(self):
+        return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
 
 
 class RawEmailBCcCore(models.Model):
@@ -286,7 +467,8 @@ class RawEmailBCcCore(models.Model):
     e_date = models.DateTimeField()
     e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
     e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
-
+    e_from_name = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to_name = models.CharField(max_length=128, blank=True, null=True, default=None)
     def __str__(self):
         return "{0} {1}-->{2}".format(self.e_id, self.e_from, self.e_to)
 
@@ -300,6 +482,15 @@ class RawComm(models.Model):
     def __str__(self):
         return self.record
 
+
+class EmailBrief(models.Model):
+    e_id = models.CharField(max_length=100,primary_key=True)
+    e_date = models.DateTimeField()
+    e_from = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_to = models.CharField(max_length=128, blank=True, null=True, default=None)
+    e_from_name = models.CharField(blank=True, null=True, max_length=128)
+    e_to_name = models.CharField(blank=True, null=True, max_length=128)
+    e_type = models.CharField(blank=True, null=True, max_length=32)
 
 
 class ToEmail(models.Model):

@@ -19,6 +19,15 @@ class mailConstant:
     alias_type_intrusted = "intrusted"
 
 
+    e_type_c_to_c = "c_to_c" #core to core mails
+    e_type_c_to_e = "c_to_e" #core to external mails
+    e_type_c_cc_c = "c_cc_c" #core cc core mails
+    e_type_c_cc_e = "c_cc_e" #core cc external mails
+    e_type_c_bcc_c = "c_bcc_c" #core bcc core mails
+    e_type_c_bcc_e = "c_bcc_e" #core bcc external mails
+
+
+
 
 
     string_unknown = "unkonwn"
