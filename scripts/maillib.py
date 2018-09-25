@@ -31,6 +31,7 @@ from scripts.nlp_pre import preprocess
 import os
 import math
 from subprocess import *
+import numpy as np
 from .Enronlib import EnronEmail
 mailpath = "/root/project/maildir/"
 
@@ -116,10 +117,81 @@ def run():
         print("{0},{1},{2},{3},{4}",t1,s1,r1,es1,er1)
         print("{0},{1},{2}",t1,p,s1 + r1 + es1 + er1)
 
-        #e.diversity = e.mails_to_core_contact_total
-        #e.density = p / e.diversity
+        mails = RawEmailFrom.objects.filter(e_id__in=t)
+        dates = [e.e_date for e in mails]
 
-        analysis_ratio(e.name)
+        min_date = min(dates)
+        start_date = datetime.datetime(year = min_date.year, month=min_date.month, day = 1)
+        max_date = max(dates)
+        maxMonth = max_date.month
+        end_date = addMonth(max_date)  # datetime.date(year = maxYear, month=maxMonth, day = 1)
+        datebin = calDatebin(min_date,max_date)
+        print("start {0} end {1}".format(min_date,max_date))
+
+        print("start {0} end {1}".format(min_date,max_date))
+        print(datebin)
+
+        to_timestamp = np.vectorize(lambda x: x.timestamp())
+        date_stamp = to_timestamp(dates)
+        date_bin = to_timestamp(datebin)
+        his = np.histogram(date_stamp,date_bin)
+        print(his)
+        print(sum(his[0]))
+
+
+
+        #datetime.strfo
+        #datetime.strptime('Jun 1 2005  1:33PM', '%b %d %Y %I:%M%p')
+
+
+
+        #mailsTo = RawEmailTo.objects.filter(e_id__in=t)
+
+        #dates = [m.e_date for m in mails]
+        #ids = set([e.e_id for e in mailsTo])
+        #for d in mails:
+        #    print(d.e_date, d.e_id)
+        
+        
+        
+
+        #print(len(t))
+        #print(len(mails))
+        #print(len(ids))
+
+
+        e.diversity = e.mails_to_core_contact_total_len
+        e.density = p / e.diversity
+
+
+
+        #maxemailnumb = analysis_com_ratio(e.name)
+        #e.ratio = e.density / maxemailnumb
+        #print("Diversity: {0}, Density: {1}, Maxnum: {2}".format(e.diversity,e.density,maxemailnumb))
+        #print("Communication ratio:{0}".format(e.ratio))
+
+def addMonth(source):
+    old_year = source.year
+    old_month = source.month
+
+    if (old_month + 1) % 13 == 0:
+        new_month = 1
+        new_year = old_year + 1
+    else:
+        new_month = old_month + 1
+        new_year = old_year
+    return datetime.datetime(year=new_year,month=new_month,day=1)
+
+def calDatebin(start,end):
+    bin = [start,]
+    cur = start
+    while cur < addMonth(end):
+        tmp = addMonth(cur)
+        bin.append(tmp)
+        cur = tmp
+    return bin
+
+
 
 
 # select core staff's email and import them into RawEmailSamll
@@ -1110,7 +1182,7 @@ def formail(list):
     return str.join(",",list)
 
 
-def analysis_ratio(name):
+def analysis_com_ratio(name):
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT e_to_name, COUNT(*) as num FROM enron_rawemailto WHERE e_from_name = %s AND e_to_name <> %s AND e_to_name <> 'unknow' GROUP BY e_to_name",
@@ -1145,10 +1217,7 @@ def analysis_ratio(name):
 
         print(output)
         m = max(output, key=lambda item: item[1])
-
-        print(m)
-
-
+        return m[1]
 
 
 def analysis_staff():
