@@ -29,6 +29,96 @@ class StaffName(models.Model):
         verbose_name = "Enron Staff"
         verbose_name_plural = "Enron Staffs"
 
+
+
+class PersonAnalysis(models.Model):
+    name = models.CharField(max_length=64,primary_key=True)
+    #name = models.CharField(blank=True,null=True,default=None, max_length=64)
+    #staff = models.ForeignKey(StaffName, on_delete=models.CASCADE)
+    type = models.CharField(blank=True,null=True,default=None, max_length=64)
+    diversity = models.FloatField(blank=True,null=True)
+    density = models.FloatField(blank=True,null=True)
+    ratio = models.FloatField(blank=True,null=True)
+    time_ratio = models .FloatField(blank=True,null=True)
+    sentiment = models.FloatField(blank=True,null=True)
+    topic_change = models.FloatField(blank=True,null=True)
+    relax_level = models.FloatField(blank=True,null=True)
+
+    mails_to_core = models.TextField(blank=True, null=True, default=None)
+    mails_to_core_send = models.TextField(blank=True, null=True, default=None)
+    mails_to_core_receive = models.TextField(blank=True, null=True, default=None)
+    mails_to_ext_send = models.TextField(blank=True, null=True, default=None)
+    mails_to_ext_receive = models.TextField(blank=True, null=True, default=None)
+    staff_to_core = models.TextField(blank=True, null=True, default=None)
+    staff_to_core_send = models.TextField(blank=True, null=True, default=None)
+    staff_to_core_receive = models.TextField(blank=True, null=True, default=None)
+
+    mails_cc_core = models.TextField(blank=True, null=True, default=None)
+    mails_cc_core_send = models.TextField(blank=True, null=True, default=None)
+    mails_cc_core_receive = models.TextField(blank=True, null=True, default=None)
+    mails_cc_ext_send = models.TextField(blank=True, null=True, default=None)
+    mails_cc_ext_receive = models.TextField(blank=True, null=True, default=None)
+    staff_cc_core = models.TextField(blank=True, null=True, default=None)
+    staff_cc_core_send = models.TextField(blank=True, null=True, default=None)
+    staff_cc_core_receive = models.TextField(blank=True, null=True, default=None)
+
+    mails_bcc_core = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_core_send = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_core_receive = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_ext_send = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_ext_receive = models.TextField(blank=True, null=True, default=None)
+    staff_bcc_core = models.TextField(blank=True, null=True, default=None)
+    staff_bcc_core_send = models.TextField(blank=True, null=True, default=None)
+    staff_bcc_core_receive = models.TextField(blank=True, null=True, default=None)
+
+
+class Person(models.Model):
+    name = models.CharField(blank=True,null=True,default=None, max_length=64)
+    type = models.CharField(blank=True,null=True,default=None, max_length=64)
+    diversity = models.FloatField(blank=True,null=True)
+    density = models.FloatField(blank=True,null=True)
+    ratio = models.FloatField(blank=True,null=True)
+    time_ratio = models .FloatField(blank=True,null=True)
+    sentiment = models.FloatField(blank=True,null=True)
+    topic_change = models.FloatField(blank=True,null=True)
+    relax_level = models.FloatField(blank=True,null=True)
+
+    time_divider = models.DateTimeField(blank=True,null=True)
+    divider_value = models.FloatField(blank=True,null=True)
+
+
+    mails_to_core = models.TextField(blank=True, null=True, default=None)
+    mails_to_core_send = models.TextField(blank=True, null=True, default=None)
+    mails_to_core_receive = models.TextField(blank=True, null=True, default=None)
+    mails_to_core_self = models.TextField(blank=True, null=True, default=None)
+    mails_to_ext_send = models.TextField(blank=True, null=True, default=None)
+    mails_to_ext_receive = models.TextField(blank=True, null=True, default=None)
+    staff_to_core = models.TextField(blank=True, null=True, default=None)
+    staff_to_core_send = models.TextField(blank=True, null=True, default=None)
+    staff_to_core_receive = models.TextField(blank=True, null=True, default=None)
+
+    mails_cc_core = models.TextField(blank=True, null=True, default=None)
+    mails_cc_core_send = models.TextField(blank=True, null=True, default=None)
+    mails_cc_core_receive = models.TextField(blank=True, null=True, default=None)
+    mails_cc_ext_send = models.TextField(blank=True, null=True, default=None)
+    mails_cc_ext_receive = models.TextField(blank=True, null=True, default=None)
+    staff_cc_core = models.TextField(blank=True, null=True, default=None)
+    staff_cc_core_send = models.TextField(blank=True, null=True, default=None)
+    staff_cc_core_receive = models.TextField(blank=True, null=True, default=None)
+
+    mails_bcc_core = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_core_send = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_core_receive = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_ext_send = models.TextField(blank=True, null=True, default=None)
+    mails_bcc_ext_receive = models.TextField(blank=True, null=True, default=None)
+    staff_bcc_core = models.TextField(blank=True, null=True, default=None)
+    staff_bcc_core_send = models.TextField(blank=True, null=True, default=None)
+    staff_bcc_core_receive = models.TextField(blank=True, null=True, default=None)
+
+
+
+
+
 class StaffAnalysis(models.Model):
     name = models.CharField(max_length=64,primary_key=True)
     diversity = models.FloatField(blank=True,null=True)

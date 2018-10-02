@@ -29,3 +29,6 @@ def preprocess(content):
     wordsStemed = [ps.stem(word) for word in wordsStopped]
     return wordsStemed
 
+def get_stemmed_content(content):
+    return preprocess(content)
+

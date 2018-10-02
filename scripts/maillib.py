@@ -18,6 +18,10 @@ from enron.models import Aliasf
 from enron.models import ToEmailNew,CcEmailNew,BccEmailNew
 from enron.models import StaCommunication
 from enron.models import StaffAnalysis
+from enron.models import PersonAnalysis
+from enron.models import Person
+
+
 from enron.models import EmailBrief
 from .emailconst import mailConstant
 
@@ -27,73 +31,71 @@ from multiprocessing import Process
 from django.db import connection
 
 from scripts.nlp_pre import preprocess
+from scripts.topictest import topic
+from scripts.topictest import topic_re
+
+from scripts.nlp_pre import get_stemmed_content
+from django.db.models import Avg, Count, Min, Sum, Max
 
 import os
 import math
 from subprocess import *
 import numpy as np
+
 from .Enronlib import EnronEmail
 mailpath = "/root/project/maildir/"
 
 def run():
-    #getFileNumber()
-    #checkoutName(mailpath)
-    #p = Email.objects.raw('SELECT num as COUNT(email_id), name as sender FROM polls_email GROUP BY sender ORDER BY COUNT(email_id) DESC')
-    #for item in p:
-    #    print(item.num + " " + item.name)
+    #initPersonTable()
+    settingPersonTable()
 
-    # p1 = Process(target=updateSender)
-    # p1.start()
-    # p1.join()
+
+    #l = StaffAnalysis.objects.filter(name="allen-p")[0:1]
+    #for idx, e in enumerate(l):
+
+        #t = e.mails_to_core_total.split(",")
+        #print("{0},{1},StaffAnalysis{2},{3},{4}".format(e.mails_to_core_total_len,
+        #                                       e.mails_to_core_send_len,
+        #                                       e.mails_to_core_receive_len,
+        #                                       e.mails_to_ext_send_len,
+        #                                       e.mails_to_ext_receive_len))
+
+        #mails = RawEmailFrom.objects.filter(e_id__in=t).order_by("e_date")
+        #for m in mails:
+        #    print(m.e_date)
+        #print(len(t),len(set(t)), mails.count())
+        #for m in mails:
+        #    print(m.e_from_name,m.e_to_name,m.e_id.e_id, m.e_date)
+
+        #re = groupmail(mails)
+        #topic_re(re)
+
+
+
+    #for c in re[5:10]:
+    #    print("++++{0} {1} ++++".format(c[0],c[1]))
+    #    if len(c[2]) != 0:
+    #        cal_topic_per_month(c[2])
+    #    else:
+    #        print("NoEmails in this Month")
     #
-    # p2 = Process(target=updateReceiverTo)
-    # p2.start()
-    # p2.join()
-    #
-    # p3 = Process(target=updateReceiverBcc)
-    # p3.start()
-    # p3.join()
-    #
-    # p4 = Process(target=updateReceiverCc)
-    # p4.start()
-    # p4.join()
+    #    print("")
 
-    #updateSender()
-    #updateReceiverTo()
-    #updateReceiverBcc()
-    #updateReceiverCc()
-    #initResultAddressTable1()
-    #initResultAddressTable()
-    #initRawEmailToTable()
-    #initResultAddressCoreTable()
-    #splitTimeLine("allen-p")
-    #importStressData()
-    #tagCoreEmailSet()
-    #initStaffAnalysis()
-    #calculateStaffAnalysis()
-    #analysis_sta_totals()
-    #
-    # step 1
-    #initCoreDataset()
-    # step 2
+#re = [[start,end,email_id_list,email_content_list].....]
+
+def cal_topic_per_month(month_email_id_list):
+    lines = []
+    for month_ids in month_email_id_list:
+        mails = RawEmailFrom.objects.filter(e_id__in = month_ids).order_by("e_date")
+        monthcontent = str.join(" ", [get_stemmed_content(e.e_content) for e in mails])
+        lines.append(monthcontent)
+    topic(lines)
 
 
-    #initCoreDataset()
-    #setStaffNameForTables()
-    #initStaffAnalysis()
-
-    #emaillist = RawEmailToExternal.objects.all()
-    #tagName(emaillist)
-    #TagName_RawEmailTo()
-    #TagName_RawEmailCc()
-    #TagName_RawEmailBcc()
-    #analysis_staff()
-
-
-
-
-    l = StaffAnalysis.objects.all()[0:1]
-    for e in l:
+# calculate diversity, density, ratio, time_ratio
+def cal_colum():
+    l = StaffAnalysis.objects.all()
+    for idx, e in enumerate(l):
         t = e.mails_to_core_total.split(",")
         t1 = e.mails_to_core_total_len
 
@@ -114,61 +116,61 @@ def run():
         p = len(list(set(s + r + es + er)))
 
 
-        print("{0},{1},{2},{3},{4}",t1,s1,r1,es1,er1)
-        print("{0},{1},{2}",t1,p,s1 + r1 + es1 + er1)
+
+        e.diversity = e.mails_to_core_contact_total_len
+
+        if e.diversity != 0:
+            e.density = p / e.diversity
+        else:
+            e.density = 0
+
+        maxemailnumb = analysis_com_ratio(e.name)
+        if maxemailnumb != 0:
+            e.ratio = e.density / maxemailnumb  # communicatiion ratio
+        else:
+            e.ratio = 0
 
         mails = RawEmailFrom.objects.filter(e_id__in=t)
         dates = [e.e_date for e in mails]
+        if len(dates) != 0:
+            min_date = min(dates)
+            max_date = max(dates)
+            datebin = calDatebin(min_date,max_date)
+            to_timestamp = np.vectorize(lambda x: x.timestamp())
+            date_stamp = to_timestamp(dates)
+            date_bin = to_timestamp(datebin)
+            his = np.histogram(date_stamp,date_bin)
+            e.time_ratio = np.std(his[0])           #communication time ratio
+        e.save()
+        print("Index: {0}, name: {1} diversity: {2}, density: {3}, ratio: {4}, time ratio: {5}".format(idx, e.name,
+              e.diversity, e.density, e.ratio, e.time_ratio))
 
+
+# groupmails by per date
+def groupmail(mails):
+    dates = [e.e_date for e in mails]
+    if len(dates) != 0:
         min_date = min(dates)
-        start_date = datetime.datetime(year = min_date.year, month=min_date.month, day = 1)
         max_date = max(dates)
-        maxMonth = max_date.month
-        end_date = addMonth(max_date)  # datetime.date(year = maxYear, month=maxMonth, day = 1)
-        datebin = calDatebin(min_date,max_date)
-        print("start {0} end {1}".format(min_date,max_date))
+        date_bin = calDatebin(min_date,max_date)
 
-        print("start {0} end {1}".format(min_date,max_date))
-        print(datebin)
-
-        to_timestamp = np.vectorize(lambda x: x.timestamp())
-        date_stamp = to_timestamp(dates)
-        date_bin = to_timestamp(datebin)
-        his = np.histogram(date_stamp,date_bin)
-        print(his)
-        print(sum(his[0]))
-
-
-
-        #datetime.strfo
-        #datetime.strptime('Jun 1 2005  1:33PM', '%b %d %Y %I:%M%p')
+        l = len(date_bin) - 1
+        re = [[None, None,[]]] * l
+        re = [[date_bin[idx],date_bin[idx + 1],[],[]] for idx,a in enumerate(re)]
+        for m in mails:
+            timestamp =  m.e_date
+            for idx, e in enumerate(re):
+                if timestamp >= e[0] and timestamp < e[1]:
+                    re[idx][2].append(m.e_id)
+                    re[idx][3].append(str.join(" ",get_stemmed_content(m.e_content)))
+                    break
+        return  re
+    else:
+        return False
 
 
 
-        #mailsTo = RawEmailTo.objects.filter(e_id__in=t)
 
-        #dates = [m.e_date for m in mails]
-        #ids = set([e.e_id for e in mailsTo])
-        #for d in mails:
-        #    print(d.e_date, d.e_id)
-        
-        
-        
-
-        #print(len(t))
-        #print(len(mails))
-        #print(len(ids))
-
-
-        e.diversity = e.mails_to_core_contact_total_len
-        e.density = p / e.diversity
-
-
-
-        #maxemailnumb = analysis_com_ratio(e.name)
-        #e.ratio = e.density / maxemailnumb
-        #print("Diversity: {0}, Density: {1}, Maxnum: {2}".format(e.diversity,e.density,maxemailnumb))
-        #print("Communication ratio:{0}".format(e.ratio))
 
 def addMonth(source):
     old_year = source.year
@@ -726,6 +728,129 @@ def initStaffAnalysis2():
 
 
 
+def initPersonTable():
+    staffs = StaffName.objects.all()
+    for s in staffs:
+        p = Person(name=s.name,type=mailConstant.analysis_type_training)
+        p.save()
+        p = Person(name=s.name,type=mailConstant.analysis_type_testing)
+        p.save()
+
+import  math
+
+def settingPersonTable():
+
+    def statistic(mails, condition, person):
+        # Total Emails
+        mails_group = mails.filter(condition).values("e_date","e_from","e_to").annotate(id=Max("e_id"))
+        ids = [m["id"] for m in mails_group]
+        mails_d = RawEmailFrom.objects.filter(e_id__in=ids).order_by("e_date")
+        ids = [m.e_id for m in mails_d]
+        person.mails_to_core = str.join(",",ids)
+        print("Total emails: {0}".format(len(ids)))
+
+        # Core Sending Emails
+        mails_group = mails.filter(condition, Q(e_from_name=name), ~Q(e_to_name=unknow)).values("e_date", "e_from", "e_to").annotate(id=Max("e_id"))
+        ids = [m["id"] for m in mails_group]
+        mails_d = RawEmailFrom.objects.filter(e_id__in=ids).order_by("e_date")
+        ids = [m.e_id for m in mails_d]
+        person.mails_to_core_send = str.join(",", ids)
+        print("Sending emails core: {0}".format(len(ids)))
+
+        # Core Receiving Emails
+        mails_group = mails.filter(condition, ~Q(e_from_name=unknow), Q(e_to_name=name)).values("e_date", "e_from", "e_to").annotate(id=Max("e_id"))
+        ids = [m["id"] for m in mails_group]
+        mails_d = RawEmailFrom.objects.filter(e_id__in=ids).order_by("e_date")
+        ids = [m.e_id for m in mails_d]
+        person.mails_to_core_receive = str.join(",", ids)
+        print("Receiving emails core: {0}".format(len(ids)))
+
+        # External Sending Emails
+        mails_group = mails.filter(condition, Q(e_from_name=name), Q(e_to_name=unknow)).values("e_date",
+                                                                                                           "e_from",
+                                                                                                           "e_to").annotate(
+            id=Max("e_id"))
+        ids = [m["id"] for m in mails_group]
+        mails_d = RawEmailFrom.objects.filter(e_id__in=ids).order_by("e_date")
+        ids = [m.e_id for m in mails_d]
+        person.mails_to_ext_send = str.join(",", ids)
+        print("Sending emails ext: {0}".format(len(ids)))
+
+        # Sending Emails
+        mails_group = mails.filter(condition, Q(e_from_name=unknow), Q(e_to_name=name)).values("e_date",
+                                                                                                          "e_from",
+                                                                                                          "e_to").annotate(
+            id=Max("e_id"))
+        ids = [m["id"] for m in mails_group]
+        mails_d = RawEmailFrom.objects.filter(e_id__in=ids).order_by("e_date")
+        ids = [m.e_id for m in mails_d]
+        person.mails_to_ext_receive = str.join(",", ids)
+        print("Receiving emails ext: {0}".format(len(ids)))
+
+        # Self Emails
+        mails_group = mails.filter(condition, Q(e_from_name=name),Q(e_to_name=name)).values("e_date", "e_from", "e_to").annotate(id=Max("e_id"))
+        ids = [m["id"] for m in mails_group]
+        mails_d = RawEmailFrom.objects.filter(e_id__in=ids).order_by("e_date")
+        ids = [m.e_id for m in mails_d]
+        person.mails_to_core_self = str.join(",", ids)
+        print("self emails: {0}".format(len(ids)))
+
+        # Contact Statistic
+        mails_group = mails.filter(condition).values("e_date", "e_from", "e_to").annotate(id=Max("id"))
+        ids = [m["id"] for m in mails_group]
+        mails_d = RawEmailTo.objects.filter(id__in=ids).order_by("e_date")
+        m_list =  mails_d.values("e_from_name").annotate(count=Count("e_from_name")).order_by()
+        name_from = [m["e_from_name"] for m  in m_list]
+        person.staff_to_core_send = str.join(",", name_from)
+        print("Sending name count {0}".format(len(name_from)))
+        m_list =  mails_d.values("e_to_name").annotate(count=Count("e_to_name")).order_by()
+        name_to = [m["e_to_name"] for m  in m_list]
+        person.staff_to_core_receive = str.join(",", name_to)
+        print("Receiving name count {0}".format(len(name_to)))
+        contact_total = list(set(name_to + name_from) - set([name,unknow]))
+        person.staff_to_core = str.join(",", contact_total)
+        print("Total contact {0}".format(len(contact_total)))
+        person.save()
+
+
+
+    unknow = "unknow"
+    p_list = Person.objects.filter(type=mailConstant.analysis_type_training)
+    idx = 0
+    for p in p_list:
+        idx += 1
+        name = p.name
+        p_test = Person.objects.get(name = name, type=mailConstant.analysis_type_testing)
+        print("=== {0} {1} ===".format(idx,name))
+        # Total including core send, core receive, external send, external receive
+        mails = RawEmailTo.objects.filter(Q(e_date__gt="1990-01-01 00:00:00"), Q(e_to_name=name)|Q(e_from_name=name))
+        mails_group = mails.values("e_date","e_from","e_to").annotate(id=Max("e_id"))
+        ids = [m["id"] for m in mails_group]
+        print("Total index {0}，{1}".format(len(set(ids)),len(ids)))
+        mails_d = RawEmailFrom.objects.filter(e_id__in=ids).order_by("e_date")
+        ids = [m.e_id for m in mails_d]
+        print("Total {0} {1}".format(len(ids), len(set(ids))))
+        k = math.floor(0.75 * len(ids))
+        d = RawEmailFrom.objects.get(e_id=ids[k])
+        dTime = d.e_date
+
+
+        print("====================Training Set==================")
+        condition =  Q(e_date__lte=dTime)
+        statistic(mails, condition, p)
+        p.time_divider = dTime
+        p.divider_value = 0.75
+        p.save()
+
+        print("====================Testing Set===================")
+        condition = Q(e_date__gt=dTime)
+        statistic(mails, condition, p_test)
+        p_test.time_divider = dTime
+        p_test.divider_value = 0.75
+        p_test.save()
+
+
+
 
 
 from django.core.serializers import serialize
@@ -1188,13 +1313,13 @@ def analysis_com_ratio(name):
             "SELECT e_to_name, COUNT(*) as num FROM enron_rawemailto WHERE e_from_name = %s AND e_to_name <> %s AND e_to_name <> 'unknow' GROUP BY e_to_name",
             (name,name))
         to_summery = cursor.fetchall()
-        print(to_summery)
+        #print(to_summery)
 
         cursor.execute(
             "SELECT e_from_name, COUNT(*) as num FROM enron_rawemailto WHERE e_to_name = %s AND e_from_name <> %s AND e_from_name <> 'unknow' GROUP BY e_from_name",
             (name, name))
         from_summery = cursor.fetchall()
-        print(from_summery)
+        #print(from_summery)
 
         if len(to_summery) > len(from_summery):
             a_list = to_summery
@@ -1202,8 +1327,6 @@ def analysis_com_ratio(name):
         else:
             a_list = from_summery
             b_list = to_summery
-
-
 
         output = []
         for a in a_list:
@@ -1215,9 +1338,12 @@ def analysis_com_ratio(name):
                     break
             output.append((to_name,to_num))
 
-        print(output)
-        m = max(output, key=lambda item: item[1])
-        return m[1]
+        #print(output)
+        if len(output) !=0 :
+            m = max(output, key=lambda item: item[1])
+            return m[1]
+        else:
+            return 0
 
 
 def analysis_staff():
@@ -1288,7 +1414,7 @@ def analysis_staff():
             id_ccset_send_internal = [a[0] for a in rows]
 
             cursor.execute(
-                "SELECT MAX(e_id_id) FROM enron_rawemailcc WHERE (e_from_name <> 'unkonw' AND e_to_name = %s) AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                "SELECT MAX(e_id_id) FROM enron_rawemailcc WHERE (e_from_name <> 'unknow' AND e_to_name = %s) AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
                 (staff.name, start_time))
             rows = cursor.fetchall()
             id_ccset_receive_internal = [a[0] for a in rows]
@@ -1335,7 +1461,7 @@ def analysis_staff():
             id_toset_send_internal = [a[0] for a in rows]
 
             cursor.execute(
-                "SELECT MAX(e_id_id) FROM enron_rawemailbcc WHERE (e_from_name <> 'unkonw' AND e_to_name = %s) AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
+                "SELECT MAX(e_id_id) FROM enron_rawemailbcc WHERE (e_from_name <> 'unknow' AND e_to_name = %s) AND e_date > %s GROUP BY e_date,e_from,e_to ORDER BY e_date DESC",
                 (staff.name, start_time))
             rows = cursor.fetchall()
             id_toset_receive_internal = [a[0] for a in rows]
@@ -1377,7 +1503,7 @@ def analysis_staff():
             send_name = [a[0] for a in rows]
 
             cursor.execute(
-                "SELECT e_from_name FROM enron_rawemailto WHERE e_from_name <> %s AND e_from_name <> 'unkonw' AND e_to_name = %s GROUP BY e_from_name",
+                "SELECT e_from_name FROM enron_rawemailto WHERE e_from_name <> %s AND e_from_name <> 'unknow' AND e_to_name = %s GROUP BY e_from_name",
                 (staff.name, staff.name))
             rows = cursor.fetchall()
             receive_name = [a[0] for a in rows]
@@ -1404,7 +1530,7 @@ def analysis_staff():
             send_name = [a[0] for a in rows]
 
             cursor.execute(
-                "SELECT e_from_name FROM enron_rawemailcc WHERE e_from_name <> %s AND e_from_name <> 'unkonw' AND e_to_name = %s GROUP BY e_from_name",
+                "SELECT e_from_name FROM enron_rawemailcc WHERE e_from_name <> %s AND e_from_name <> 'unknow' AND e_to_name = %s GROUP BY e_from_name",
                 (staff.name, staff.name))
             rows = cursor.fetchall()
             receive_name = [a[0] for a in rows]
@@ -1431,7 +1557,7 @@ def analysis_staff():
             send_name = [a[0] for a in rows]
 
             cursor.execute(
-                "SELECT e_from_name FROM enron_rawemailbcc WHERE e_from_name <> %s AND e_from_name <> 'unkonw' AND e_to_name = %s GROUP BY e_from_name",
+                "SELECT e_from_name FROM enron_rawemailbcc WHERE e_from_name <> %s AND e_from_name <> 'unknow' AND e_to_name = %s GROUP BY e_from_name",
                 (staff.name, staff.name))
             rows = cursor.fetchall()
             receive_name = [a[0] for a in rows]

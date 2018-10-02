@@ -31,3 +31,7 @@ class mailConstant:
 
 
     string_unknown = "unkonwn"
+
+
+    analysis_type_training = "training"
+    analysis_type_testing = "testing"

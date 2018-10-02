@@ -13,7 +13,9 @@ from  operator import itemgetter
 
 def run():
     #history('a','b')
-    ini_com()
+    #ini_com()
+    e = RawEmailTo.objects.filter(Q(e_date__gt="1990-01-01 00:00:00"), Q(e_from_name="allen-p") | Q(e_to_name="allen-p"))
+
 
 def history(s_a, s_b):
     #s_a = 'allen-p'

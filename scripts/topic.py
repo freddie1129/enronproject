@@ -1,3 +1,5 @@
+#import spacy
+#spacy.load('en')
 from spacy.lang.en import English
 
 parser = English()
