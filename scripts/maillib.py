@@ -741,6 +741,10 @@ import  math
 def settingPersonTable():
 
     def statistic(mails, condition, person):
+        name = person.name
+
+        person.mails_to_core_send = ""
+        person.mails_to_core_receive = ""
         # Total Emails
         mails_group = mails.filter(condition).values("e_date","e_from","e_to").annotate(id=Max("e_id"))
         ids = [m["id"] for m in mails_group]
@@ -748,6 +752,27 @@ def settingPersonTable():
         ids = [m.e_id for m in mails_d]
         person.mails_to_core = str.join(",",ids)
         print("Total emails: {0}".format(len(ids)))
+
+
+        # time ratio
+
+
+        dates = [e.e_date for e in mails_d]
+        if len(dates) != 0:
+            min_date = min(dates)
+            max_date = max(dates)
+            datebin = calDatebin(min_date, max_date)
+            to_timestamp = np.vectorize(lambda x: x.timestamp())
+            date_stamp = to_timestamp(dates)
+            date_bin = to_timestamp(datebin)
+            his = np.histogram(date_stamp, date_bin)
+            time_ratio = np.std(his[0])  # communication time ratio
+            print("ratio: {0}".format(person.time_ratio))
+
+
+
+
+
 
         # Core Sending Emails
         mails_group = mails.filter(condition, Q(e_from_name=name), ~Q(e_to_name=unknow)).values("e_date", "e_from", "e_to").annotate(id=Max("e_id"))
@@ -799,17 +824,65 @@ def settingPersonTable():
         mails_group = mails.filter(condition).values("e_date", "e_from", "e_to").annotate(id=Max("id"))
         ids = [m["id"] for m in mails_group]
         mails_d = RawEmailTo.objects.filter(id__in=ids).order_by("e_date")
-        m_list =  mails_d.values("e_from_name").annotate(count=Count("e_from_name")).order_by()
-        name_from = [m["e_from_name"] for m  in m_list]
+        m_list_from =  mails_d.values("e_from_name").annotate(count=Count("e_from_name")).order_by()
+        name_from = [m["e_from_name"] for m  in m_list_from]
+        name_from_dic = {}
+        for m in m_list_from:
+            name_from_dic[m["e_from_name"]] = m["count"]
+
         person.staff_to_core_send = str.join(",", name_from)
         print("Sending name count {0}".format(len(name_from)))
-        m_list =  mails_d.values("e_to_name").annotate(count=Count("e_to_name")).order_by()
-        name_to = [m["e_to_name"] for m  in m_list]
+        m_list_to =  mails_d.values("e_to_name").annotate(count=Count("e_to_name")).order_by()
+        name_to = [m["e_to_name"] for m  in m_list_to]
+
+        name_to_dic = {}
+        for m in m_list_to:
+            name_to_dic[m["e_to_name"]] = m["count"]
+
+
         person.staff_to_core_receive = str.join(",", name_to)
         print("Receiving name count {0}".format(len(name_to)))
         contact_total = list(set(name_to + name_from) - set([name,unknow]))
         person.staff_to_core = str.join(",", contact_total)
         print("Total contact {0}".format(len(contact_total)))
+
+        name_dic = {}
+        for name in contact_total:
+            try:
+                f = name_from_dic[name]
+            except KeyError:
+                f = 0
+            try:
+                t = name_to_dic[name]
+            except KeyError:
+                t = 0
+            name_dic[name] = f + t
+
+        #print(name_from_dic)
+        #print(name_to_dic)
+        #print(name_dic)
+
+        dictList = []
+        for key, value in name_dic.items():
+            dictList.append([key, value])
+
+        #print(dictList)
+
+        max_staff =  max(dictList, key=lambda item: item[1])
+        max_com_count = max_staff[1]
+        #print(max_staff[0],max_staff[1])
+
+        person.diversity = len(contact_total)
+        person.density = (len(person.mails_to_core_send.split(",")) + len(person.mails_to_core_receive.split(","))) / person.diversity
+        person.ratio = person.density / max_com_count
+        person.time_ratio = time_ratio
+        print("=============================")
+        print("diversity: {0} density: {1} ratio: {2} time_ratio: {3}".format(
+            person.diversity,person.density,person.ratio,person.time_ratio
+        ))
+        print("=============================")
+
+
         person.save()
 
 
@@ -851,6 +924,52 @@ def settingPersonTable():
 
 
 
+
+def cal_PersonTable():
+    l = Person.objects.all()
+    for idx, e in enumerate(l):
+        t = e.mails_to_core.split(",")
+
+        s = e.mails_to_core_send.split(",")
+
+        r = e.mails_to_core_receive.split(",")
+
+        es = e.mails_to_ext_send.split(",")
+
+        er = e.mails_to_ext_receive.split(",")
+
+        p = len(list(set(s + r + es + er)))
+
+        e.diversity = len(e.staff_to_core.split(","))
+
+        if e.diversity != 0:
+            e.density = p / e.diversity
+        else:
+            e.density = 0
+
+        maxemailnumb = analysis_com_ratio(e.name)
+        if maxemailnumb != 0:
+            e.ratio = e.density / maxemailnumb  # communicatiion ratio
+        else:
+            e.ratio = 0
+
+        mails = RawEmailFrom.objects.filter(e_id__in=t)
+        dates = [e.e_date for e in mails]
+        if len(dates) != 0:
+            min_date = min(dates)
+            max_date = max(dates)
+            datebin = calDatebin(min_date, max_date)
+            to_timestamp = np.vectorize(lambda x: x.timestamp())
+            date_stamp = to_timestamp(dates)
+            date_bin = to_timestamp(datebin)
+            his = np.histogram(date_stamp, date_bin)
+            e.time_ratio = np.std(his[0])  # communication time ratio
+        e.save()
+        print("Index: {0}, name: {1} diversity: {2}, density: {3}, ratio: {4}, time ratio: {5}".format(idx, e.name,
+                                                                                                       e.diversity,
+                                                                                                       e.density,
+                                                                                                       e.ratio,
+                                                                                                       e.time_ratio))
 
 
 from django.core.serializers import serialize
