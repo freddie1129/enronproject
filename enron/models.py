@@ -93,6 +93,7 @@ class Person(models.Model):
     mails_to_core_self = models.TextField(blank=True, null=True, default=None)
     mails_to_ext_send = models.TextField(blank=True, null=True, default=None)
     mails_to_ext_receive = models.TextField(blank=True, null=True, default=None)
+
     staff_to_core = models.TextField(blank=True, null=True, default=None)
     staff_to_core_send = models.TextField(blank=True, null=True, default=None)
     staff_to_core_receive = models.TextField(blank=True, null=True, default=None)

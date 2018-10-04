@@ -32,7 +32,7 @@ from django.db import connection
 
 from scripts.nlp_pre import preprocess
 from scripts.topictest import topic
-from scripts.topictest import topic_re
+from scripts.topictest import topic_re,topic_re_V2
 
 from scripts.nlp_pre import get_stemmed_content
 from django.db.models import Avg, Count, Min, Sum, Max
@@ -47,7 +47,8 @@ mailpath = "/root/project/maildir/"
 
 def run():
     #initPersonTable()
-    settingPersonTable()
+    #settingPersonTable()
+    topic_test()
 
 
     #l = StaffAnalysis.objects.filter(name="allen-p")[0:1]
@@ -168,6 +169,26 @@ def groupmail(mails):
     else:
         return False
 
+
+def topic_test():
+    persons = Person.objects.all()
+    for idx, p in enumerate(persons):
+        #print("{0},{1},{2},{3},{4},{5}".format(len(p.mails_to_core.split(",")),
+        #                                   len(p.mails_to_core_send.split(",")),
+        #                                   len(p.mails_to_core_receive.split(",")),
+        #                                   len(p.mails_to_core_self.split(",")),
+        #                                   len(p.mails_to_ext_send.split(",")),
+        #                                   len(p.mails_to_ext_receive.split(","))))
+
+        e_id_list = p.mails_to_core.split(",")
+        mails = RawEmailFrom.objects.filter(e_id__in=e_id_list).order_by("e_date")
+        ret = groupmail(mails)
+        #for re in ret:
+        #    print("{0},{1},{2},{3}".format(re[0],re[1],len(re[2]),len(re[3])))
+        siminarity =  topic_re_V2(ret)
+        p.topic_change = siminarity
+        print(idx,p.name, siminarity)
+        p.save()
 
 
 
@@ -868,13 +889,22 @@ def settingPersonTable():
 
         #print(dictList)
 
-        max_staff =  max(dictList, key=lambda item: item[1])
-        max_com_count = max_staff[1]
+        max_com_count = 0
+        if (len(dictList) >= 1):
+            max_staff =  max(dictList, key=lambda item: item[1])
+            max_com_count = max_staff[1]
+
+
+
         #print(max_staff[0],max_staff[1])
 
         person.diversity = len(contact_total)
         person.density = (len(person.mails_to_core_send.split(",")) + len(person.mails_to_core_receive.split(","))) / person.diversity
-        person.ratio = person.density / max_com_count
+        if max_com_count != 0:
+            person.ratio = person.density / max_com_count
+        else:
+            person.ratio = 0
+
         person.time_ratio = time_ratio
         print("=============================")
         print("diversity: {0} density: {1} ratio: {2} time_ratio: {3}".format(
