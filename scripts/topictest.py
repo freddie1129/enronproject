@@ -204,57 +204,72 @@ def topic_re_V2(re_list):
     for month in re_list:
         #print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
         #print("{0},{1},{2},{3}".format(month[0], month[1], len(month[2]), len(month[3])))
-        if len(month[2]) != 0:
-            text_data = []
-            for line in month[3]:
-                tokens =  prepare_text_for_lda(line)
-                text_data.append(tokens)
-            dictionary = corpora.Dictionary(text_data)
-            corpus = [dictionary.doc2bow(text) for text in text_data]
-            pickle.dump(corpus, open('corpus.pkl', 'wb'))
-            dictionary.save('dictionary.gensim')
+        s = str.join(" ", month[3])
+        #print("dddd")
+        #print(s)
+        #print(len(s))
 
-            NUM_TOPICS = 5
-            ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=NUM_TOPICS, id2word=dictionary, passes=15)
-            ldamodel.save('model5.gensim')
-            topics = ldamodel.print_topics(num_words=5)
-            #print(ldamodel.get_topics())
-            #print('&&&&&&&&&&&&&&&&&&&')
-            topic_array = []
-            for topic in topics:
-                #topic[1]
-                ws = topic[1].split("+")
-                dic = []
-                for w in ws:
-                    s = w.split("*")
-                    #dic[s[1].split("\"")[1]] = float(s[0])
-                    dic.append ((s[1].split("\"")[1], float(s[0])))
-                #print(dic)
-                topic_array.append(dic)
-            #print(topic_array)
+        if len(month[2]) != 0 and len(s) != 0:
+            try:
+                text_data = []
+                for line in month[3]:
+                    tokens =  prepare_text_for_lda(line)
+                    text_data.append(tokens)
+                dictionary = corpora.Dictionary(text_data)
+                corpus = [dictionary.doc2bow(text) for text in text_data]
+                pickle.dump(corpus, open('corpus.pkl', 'wb'))
+                dictionary.save('dictionary.gensim')
 
-            #sim = gensim.matutils.cossim([], [])
-            #print("sim: {0}".format(sim))
+                NUM_TOPICS = 5
+                #print(text_data)
+                #print(corpus)
+                #print(len(corpus))
+                ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=NUM_TOPICS, id2word=dictionary, passes=15)
+                ldamodel.save('model5.gensim')
+                topics = ldamodel.print_topics(num_words=5)
+                #print(ldamodel.get_topics())
+                #print('&&&&&&&&&&&&&&&&&&&')
+                topic_array = []
+                for topic in topics:
+                    #topic[1]
+                    ws = topic[1].split("+")
+                    dic = []
+                    for w in ws:
+                        s = w.split("*")
+                        #dic[s[1].split("\"")[1]] = float(s[0])
+                        dic.append ((s[1].split("\"")[1], float(s[0])))
+                    #print(dic)
+                    topic_array.append(dic)
+                #print(topic_array)
 
-            new_doc = str.join(" ",month[3])
-            new_doc = prepare_text_for_lda(new_doc)
-            new_doc_bow = dictionary.doc2bow(new_doc)
-            # print(new_doc_bow)
-            v1 = ldamodel.get_document_topics(new_doc_bow)
-            topic_main = []
-            topic_en = []
-            #print(v1)
-            for t in v1:
-                weight_topic = [(m[0],m[1]*t[1]) for m in topic_array[t[0]]]
-                topic_main.append(weight_topic)
-                topic_en += weight_topic
+                #sim = gensim.matutils.cossim([], [])
+                #print("sim: {0}".format(sim))
 
-            #print(topic_main)
-            #print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
-            #print(topic_en)
-            topics_summery.append(topic_en)
-            #topics.append(v1)
-            #print(v1)
+                new_doc = str.join(" ",month[3])
+                if len(new_doc) > 1000000:
+                    new_doc = new_doc[0:1000000-1]
+                new_doc = prepare_text_for_lda(new_doc)
+                new_doc_bow = dictionary.doc2bow(new_doc)
+                # print(new_doc_bow)
+                v1 = ldamodel.get_document_topics(new_doc_bow)
+                topic_main = []
+                topic_en = []
+                #print(v1)
+                for t in v1:
+                    weight_topic = [(m[0],m[1]*t[1]) for m in topic_array[t[0]]]
+                    topic_main.append(weight_topic)
+                    topic_en += weight_topic
+
+                #print(topic_main)
+                #print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+                #print(topic_en)
+                topics_summery.append(topic_en)
+                #topics.append(v1)
+                #print(v1)
+            except ValueError:
+                topics_summery.append([])
+            except IndexError:
+                topics_summery.append([])
         else:
             #print("**************No Emails in this month*****************")
             topics_summery.append([])
@@ -264,10 +279,15 @@ def topic_re_V2(re_list):
         next_topic = topics_summery[idx + 1]
         s = gensim.matutils.cossim(topic,next_topic)
         simi.append(s)
-        print("Similarity: {0}".format(s))
+        #print("Similarity: {0}".format(s))
     ava_simi = np.average(simi)
     print("Avarge Similarity: {0}".format(ava_simi))
-    return  ava_simi
+    if math.isnan(ava_simi):
+        return 0
+    else:
+        return ava_simi
+
+    #return  ava_simi
     #for t in topics_summery:
     #    print(t)
 

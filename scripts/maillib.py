@@ -48,7 +48,8 @@ mailpath = "/root/project/maildir/"
 def run():
     #initPersonTable()
     #settingPersonTable()
-    topic_test()
+    #topic_test()
+    stress_calculation()
 
 
     #l = StaffAnalysis.objects.filter(name="allen-p")[0:1]
@@ -171,8 +172,10 @@ def groupmail(mails):
 
 
 def topic_test():
-    persons = Person.objects.all()
+    persons = Person.objects.filter(topic_change=None)
+    length = persons.count()
     for idx, p in enumerate(persons):
+        print(length - idx, p.name)
         #print("{0},{1},{2},{3},{4},{5}".format(len(p.mails_to_core.split(",")),
         #                                   len(p.mails_to_core_send.split(",")),
         #                                   len(p.mails_to_core_receive.split(",")),
@@ -187,8 +190,39 @@ def topic_test():
         #    print("{0},{1},{2},{3}".format(re[0],re[1],len(re[2]),len(re[3])))
         siminarity =  topic_re_V2(ret)
         p.topic_change = siminarity
-        print(idx,p.name, siminarity)
+        print(siminarity)
         p.save()
+
+def stress_calculation():
+    persons = Person.objects.filter(Q(relax_level=None) | Q(stress_level=None))
+    length = persons.count()
+    for idx, p in enumerate(persons):
+        print(length - idx, p.name)
+        e_id_list = p.mails_to_core_send.split(",") + p.mails_to_ext_send.split(",")
+        mails = RawEmailFrom.objects.filter(e_id__in=e_id_list).order_by("e_date")
+        ml = mails.count()
+        print("Total: {0}".format(ml))
+        relax = []
+        stress = []
+        for idx, m in enumerate(mails):
+            content = str.join(" ", preprocess(m.e_content))
+            ret = stressAnalysis(content)
+            m.relax_level = ret[0]
+            m.stress_level = ret[1]
+            m.save()
+            relax.append(m.relax_level)
+            stress.append(m.stress_level)
+            print("{0}: {1} - {2}".format(ml - idx, m.relax_level, m.stress_level))
+        print(relax)
+        print(stress)
+        average_relax = np.mean(relax)
+        average_stress = np.mean(stress)
+        p.relax_level = average_relax
+        p.stress_level = average_stress
+        print(average_relax,average_stress)
+
+        p.save()
+
 
 
 
@@ -699,11 +733,11 @@ def stressAnalysis(text):
     line = process.stdout.readline().decode("utf-8")
     ret = line.split("+")
     if len(ret) >= 2:
-        relax_level = ret[0]
-        stress_level = ret[1]
+        relax_level = int(ret[0])
+        stress_level = int(ret[1])
         return (relax_level,stress_level)
     else:
-        return False
+        return (0,0)
 
 def importStressData():
     logfile = open("importStressData.log", "w")
