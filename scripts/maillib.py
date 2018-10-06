@@ -46,10 +46,11 @@ from .Enronlib import EnronEmail
 mailpath = "/root/project/maildir/"
 
 def run():
+    stressAnalysis("The text 'The train is very late.")
     #initPersonTable()
     #settingPersonTable()
     #topic_test()
-    stress_calculation()
+    #stress_calculation()
 
 
     #l = StaffAnalysis.objects.filter(name="allen-p")[0:1]
@@ -204,23 +205,27 @@ def stress_calculation():
         print("Total: {0}".format(ml))
         relax = []
         stress = []
+        scale_stress = []
         for idx, m in enumerate(mails):
             content = str.join(" ", preprocess(m.e_content))
             ret = stressAnalysis(content)
             m.relax_level = ret[0]
             m.stress_level = ret[1]
+            m.scale_level = ret[2]
             m.save()
             relax.append(m.relax_level)
             stress.append(m.stress_level)
-            print("{0}: {1} - {2}".format(ml - idx, m.relax_level, m.stress_level))
-        print(relax)
-        print(stress)
+            scale_stress.append(m.scale_level)
+            #print("{0}: {1} - {2}".format(ml - idx, m.relax_level, m.stress_level))
+        #print(relax)
+        #print(stress)
         average_relax = np.mean(relax)
         average_stress = np.mean(stress)
+        average_scale = np.mean(scale_stress)
         p.relax_level = average_relax
         p.stress_level = average_stress
-        print(average_relax,average_stress)
-
+        p.scale_level = average_scale
+        print(average_relax,average_stress,average_scale)
         p.save()
 
 
@@ -728,16 +733,22 @@ def analysis_bcc_mail():
 
 
 def stressAnalysis(text):
-    process = Popen(['java', '-jar', './scripts/TensiStrengthMain.jar', 'sentidata', './scripts/TensiStrength_Data/', 'explain', "text",
-                     text, "urlencoded", "mood", "0"], stdout=PIPE, stderr=PIPE)
-    line = process.stdout.readline().decode("utf-8")
-    ret = line.split("+")
-    if len(ret) >= 2:
-        relax_level = int(ret[0])
-        stress_level = int(ret[1])
-        return (relax_level,stress_level)
-    else:
-        return (0,0)
+    try:
+        process = Popen(['java', '-jar', './scripts/TensiStrengthMain.jar', 'sentidata', './scripts/TensiStrength_Data/', 'scale', "text",
+                         text, "urlencoded", "mood", "0"], stdout=PIPE, stderr=PIPE)
+        line = process.stdout.readline().decode("utf-8")
+        print(line.strip())
+        ret = line.strip().split("+")
+        print(ret)
+        if len(ret) >= 2:
+            relax_level = int(ret[0])
+            stress_level = int(ret[1])
+            scale_level = int(ret[2])
+            return (relax_level,stress_level,scale_level)
+        else:
+            return (0,0,0)
+    except OSError:
+        return (0,0,0)
 
 def importStressData():
     logfile = open("importStressData.log", "w")
@@ -933,7 +944,10 @@ def settingPersonTable():
         #print(max_staff[0],max_staff[1])
 
         person.diversity = len(contact_total)
-        person.density = (len(person.mails_to_core_send.split(",")) + len(person.mails_to_core_receive.split(","))) / person.diversity
+        if person.diversity == 0:
+            person.density = 0
+        else:
+            person.density = (len(person.mails_to_core_send.split(",")) + len(person.mails_to_core_receive.split(","))) / person.diversity
         if max_com_count != 0:
             person.ratio = person.density / max_com_count
         else:

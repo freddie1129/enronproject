@@ -83,6 +83,8 @@ class Person(models.Model):
     topic_change = models.FloatField(blank=True,null=True)
     relax_level = models.FloatField(blank=True,null=True,default=None)
     stress_level = models.FloatField(blank=True, null=True,default=None)
+    scale_level = models.FloatField(blank=True, null=True,default=None)
+
 
     time_divider = models.DateTimeField(blank=True,null=True)
     divider_value = models.FloatField(blank=True,null=True)
@@ -422,6 +424,8 @@ class RawEmailFrom(models.Model):
     e_path = models.CharField(blank=True, null=True, default=None,max_length=200)
     relax_level = models.IntegerField(blank=True, null=True,default=None)
     stress_level = models.IntegerField(blank=True, null=True,default=None)
+    scale_level = models.IntegerField(blank=True, null=True,default=None)
+
     e_sender_name = models.CharField(max_length=128,blank=True, null=True, default=None)
 
     def __str__(self):
