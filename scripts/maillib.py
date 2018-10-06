@@ -46,11 +46,11 @@ from .Enronlib import EnronEmail
 mailpath = "/root/project/maildir/"
 
 def run():
-    stressAnalysis("The text 'The train is very late.")
+    #stressAnalysis("The text 'The train is very late.")
     #initPersonTable()
     #settingPersonTable()
     #topic_test()
-    #stress_calculation()
+    stress_calculation()
 
 
     #l = StaffAnalysis.objects.filter(name="allen-p")[0:1]
@@ -195,7 +195,7 @@ def topic_test():
         p.save()
 
 def stress_calculation():
-    persons = Person.objects.filter(Q(relax_level=None) | Q(stress_level=None))
+    persons = Person.objects.all()   #filter(Q(relax_level=None) | Q(stress_level=None))
     length = persons.count()
     for idx, p in enumerate(persons):
         print(length - idx, p.name)
@@ -217,8 +217,6 @@ def stress_calculation():
             stress.append(m.stress_level)
             scale_stress.append(m.scale_level)
             #print("{0}: {1} - {2}".format(ml - idx, m.relax_level, m.stress_level))
-        #print(relax)
-        #print(stress)
         average_relax = np.mean(relax)
         average_stress = np.mean(stress)
         average_scale = np.mean(scale_stress)
@@ -737,9 +735,9 @@ def stressAnalysis(text):
         process = Popen(['java', '-jar', './scripts/TensiStrengthMain.jar', 'sentidata', './scripts/TensiStrength_Data/', 'scale', "text",
                          text, "urlencoded", "mood", "0"], stdout=PIPE, stderr=PIPE)
         line = process.stdout.readline().decode("utf-8")
-        print(line.strip())
+        #print(line.strip())
         ret = line.strip().split("+")
-        print(ret)
+        #print(ret)
         if len(ret) >= 2:
             relax_level = int(ret[0])
             stress_level = int(ret[1])
