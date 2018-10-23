@@ -31,6 +31,7 @@ from multiprocessing import Process
 from django.db import connection
 
 from scripts.nlp_pre import preprocess
+from scripts.nlp_pre import processStopWord
 from scripts.topictest import topic
 from scripts.topictest import topic_re,topic_re_V2
 
@@ -50,8 +51,9 @@ def run():
     #initPersonTable()
     #settingPersonTable()
     #topic_test()
-    stress_calculation()
-
+    #stress_calculation()
+    #testSentiment("The train is late.".split(" "))
+    sentiment_calculation()
 
     #l = StaffAnalysis.objects.filter(name="allen-p")[0:1]
     #for idx, e in enumerate(l):
@@ -195,7 +197,7 @@ def topic_test():
         p.save()
 
 def stress_calculation():
-    persons = Person.objects.all()   #filter(Q(relax_level=None) | Q(stress_level=None))
+    persons = Person.objects.filter(Q(scale_level=None))
     length = persons.count()
     for idx, p in enumerate(persons):
         print(length - idx, p.name)
@@ -217,15 +219,97 @@ def stress_calculation():
             stress.append(m.stress_level)
             scale_stress.append(m.scale_level)
             #print("{0}: {1} - {2}".format(ml - idx, m.relax_level, m.stress_level))
-        average_relax = np.mean(relax)
-        average_stress = np.mean(stress)
-        average_scale = np.mean(scale_stress)
+
+        #print(relax)
+        #print(stress)
+        #print(scale_stress)
+
+        if len(relax) > 0:
+            average_relax = np.mean(relax)
+        else:
+            average_relax = None
+        if len(stress) > 0:
+            average_stress = np.mean(stress)
+        else:
+            average_stress = None
+        if len(scale_stress) > 0:
+            average_scale = np.mean(scale_stress)
+        else:
+            average_scale = None
         p.relax_level = average_relax
         p.stress_level = average_stress
         p.scale_level = average_scale
         print(average_relax,average_stress,average_scale)
         p.save()
 
+
+def initSentiTable(filepath):
+    with open(filepath) as f:
+        content = f.readlines()
+    content = [x.strip() for x in content]
+    print("Length: {0}".format(len(content)))
+    t = []
+    for idx, row in enumerate(content):
+        a = row.split(" ")
+        #print(idx, a)
+        b = [x.split("=")[1] for x in a]
+        if b[0] == 'weaksubj':
+            if b[5] == 'negative':
+                value = -1
+            else:
+                value = 1
+        else:
+            if b[5] == "weaksubj":
+                value = -2
+            else:
+                value = 2
+        t.append((b[2], value))
+    return  t
+
+def analysisSentiment(content, sentiHash):
+    #for s in sentiHash:
+    #    print(s)
+    v = []
+    #print(content)
+    for a in content:
+        hit = [s[1] for s in sentiHash if s[0] == a]
+        if len(hit) > 0:
+            v.append(hit[0])
+    #print("==================")
+    #print(v)
+    if len(v) == 0:
+        return 0
+    else:
+        return np.mean(v)
+
+def testSentiment(content):
+    a = analysisSentiment(content, initSentiTable("scripts/OpinionFinder_Lexicon.tff"))
+    print(a)
+
+def sentiment_calculation():
+    sentiHash = initSentiTable("./scripts/OpinionFinder_Lexicon.tff")
+    persons = Person.objects.all() #.filter(Q(senti_level=None))
+    length = persons.count()
+    for idx, p in enumerate(persons):
+        print(length - idx, p.name)
+        e_id_list = p.mails_to_core_send.split(",") + p.mails_to_ext_send.split(",")
+        mails = RawEmailFrom.objects.filter(e_id__in=e_id_list).order_by("e_date")
+        ml = mails.count()
+        print("Total: {0}".format(ml))
+        senti = []
+        for idx, m in enumerate(mails):
+            content = processStopWord(m.e_content)
+            m.senti_level = analysisSentiment(content, sentiHash)
+            #print(m.senti_level)
+            senti.append(m.senti_level)
+            m.save()
+        if len(senti) > 0:
+            average_senti = np.mean(senti)
+        else:
+            average_senti = None
+        p.senti_level = average_senti
+        print(length - idx, p.name, average_senti)
+        p.save()
 
 
 

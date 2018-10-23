@@ -29,6 +29,20 @@ def preprocess(content):
     wordsStemed = [ps.stem(word) for word in wordsStopped]
     return wordsStemed
 
+def processStopWord(content):
+    context =  content.split("---------------------- Forwarded",1)[0]
+    context = context.lower()
+
+    words = word_tokenize(context)
+    wordsStopped = []
+
+    all_stops = stopWords | set(string.punctuation)
+    for w in words:
+        if w not in all_stops:
+            wordsStopped.append(w)
+    return wordsStopped
+
+
 def get_stemmed_content(content):
     return preprocess(content)
 

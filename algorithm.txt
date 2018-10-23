@@ -1,0 +1,81 @@
+
+
+A. Pressure prediction in working environment adopting heterogenous communication structure (graph)
+
+1. calculate "sentiment" value for each email;
+2. calculate "pressure" value for each email;
+3. separate dataset to two subsets based on time and volume
+    - the first 3/4 volume as training
+    - the last 1/4 as testing
+4. use the training set
+    - find a list of people with high accumulated "pressure" values (positive samples)
+    - find a list of people with low accumulated "pressure" values (negative samples)
+    - analyse the relations between the change of "pressure" values with
+        - k: communication diversity (in a total how many communicators in communication)
+        - i: communication density (total emails/total communicators)
+        - m: communication ratio (density vs. most freq communication)
+        - n: communication time ratio (smooth freq vs. peak freq)
+        - o: sentiment accumulated value
+        - p: topic change: (i) for 2 months, calculate topic model; (ii) calculate the accumulated cosine similarities
+        - y = f(k, i, m, n, o, t, p), f: SVM, NB, etc. "pressure" value as label
+        - y'=\alpha*f_svm + \beta*f_nb + \gamma*f_etc
+ 5. use the testing set
+    - test the developed ensemble model
+    - test the individual SVM, NB, etc model (baselines)
+    - compare the results with GT and calculate confusion table (precision, recall, accuracy, f-score)
+    - compare the performance of "developed ensemble model" with "baselines"
+
+
+B. Adaptive Pressure prediction in working environment adopting heterogenous communication structure (graph)
+
+
+
+
+w1	w2	w3	w4  
+t1	t2	t3	t4
+
+cos(t1,t2)=?
+cos(t2,t3)=?
+cos(t3,t4)=?
+
+topic model 1= {<work, 0.7>, <doc, 0.5>, <approv, 0.3>}
+topic model 2= {<doc, 0.6>, <approv, 0.8>, <holid, 0.4>}
+
+4 testing samples
+
+   GT 	M
+1. t	t -> t
+2. f	t -> f
+3. t	f -> f
+4. t	t -> t 
+
+
+
+
+
+SELECT email.e_id, email.e_date, email.e_from, email.e_subject, email.e_content, email.e_path,alias.staff_id 
+FROM (SELECT * FROM enron_rawemailfrom WHERE e_from IN (SELECT emailAddress FROM enron_alias WHERE isTrust=1) LIMIT 1000) AS email 
+INNER JOIN enron_alias AS alias ON email.e_from = alias.emailAddress LIMIT 100
+
+SELECT COUNT(*) 
+FROM (SELECT email.e_id, email.e_date, email.e_from, email.e_subject, email.e_content, email.e_path,alias.staff_id 
+      FROM (SELECT * 
+            FROM enron_rawemailfrom 
+            WHERE e_from IN (SELECT emailAddress FROM enron_alias WHERE isTrust=1 AS T)) AS email 
+INNER JOIN enron_alias AS alias ON email.e_from = alias.emailAddress)
+
+
+SELECT COUNT(*) 
+FROM (SELECT email.e_id, email.e_date, email.e_from, email.e_subject, email.e_content, email.e_path,alias.staff_id 
+      FROM (SELECT * 
+            FROM enron_rawemailfrom 
+            WHERE e_from IN (SELECT emailAddress FROM enron_alias WHERE isTrust=1 AS T)) AS email 
+      INNER JOIN enron_alias AS alias ON email.e_from = alias.emailAddress AS T2)
+
+SELECT COUNT(*)
+FROM
+(SELECT email.e_id, email.e_date, email.e_from, email.e_subject, email.e_content, email.e_path,alias.staff_id 
+FROM (SELECT * FROM enron_rawemailfrom WHERE e_from IN (SELECT emailAddress FROM enron_alias WHERE isTrust=1) LIMIT 1000) AS email 
+INNER JOIN enron_alias AS alias ON email.e_from = alias.emailAddress LIMIT 100) AS T
+
+
